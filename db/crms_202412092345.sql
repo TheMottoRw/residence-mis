@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.39, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.40, for Linux (x86_64)
 --
 -- Host: localhost    Database: crms
 -- ------------------------------------------------------
--- Server version	8.0.39-0ubuntu0.22.04.1
+-- Server version	8.0.40-0ubuntu0.22.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `cells`;
 CREATE TABLE `cells` (
   `CellID` int NOT NULL AUTO_INCREMENT,
   `SectorID` int NOT NULL,
-  `Cell` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Cell` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`CellID`),
   KEY `sector` (`SectorID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2149 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -42,6 +42,38 @@ INSERT INTO `cells` VALUES (1,152,'Agahabwa'),(2,181,'Agakomeye '),(3,326,'Agata
 UNLOCK TABLES;
 
 --
+-- Table structure for table `certificate_requests`
+--
+
+DROP TABLE IF EXISTS `certificate_requests`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `certificate_requests` (
+  `RequestNo` int NOT NULL AUTO_INCREMENT,
+  `ResidentNo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ID` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `RequestDate` datetime DEFAULT CURRENT_TIMESTAMP,
+  `HouseOwnerApproval` enum('0','1') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `HouseOwnerApprovedAt` datetime DEFAULT NULL,
+  `VillageLeaderApproval` enum('0','1') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `VillageLeaderApprovedAt` datetime DEFAULT NULL,
+  `CellLeaderApproval` enum('0','1') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `CellLeaderApprovedAt` datetime DEFAULT NULL,
+  PRIMARY KEY (`RequestNo`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `certificate_requests`
+--
+
+LOCK TABLES `certificate_requests` WRITE;
+/*!40000 ALTER TABLE `certificate_requests` DISABLE KEYS */;
+INSERT INTO `certificate_requests` VALUES (1,'20482921','1122336655447788','2024-12-09 11:28:36','0',NULL,'1','2024-12-09 17:08:00','1','2024-12-09 22:05:00'),(2,'88329654','123456789456231','2024-12-09 22:36:26',NULL,NULL,NULL,NULL,NULL,NULL),(3,'21580327','1199680081555266','2024-12-09 23:18:25','1','2024-12-09 23:21:00','1','2024-12-09 23:40:00','1','2024-12-09 23:40:00');
+/*!40000 ALTER TABLE `certificate_requests` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `districts`
 --
 
@@ -51,7 +83,7 @@ DROP TABLE IF EXISTS `districts`;
 CREATE TABLE `districts` (
   `DistrictID` int NOT NULL AUTO_INCREMENT,
   `ProvinceID` int NOT NULL,
-  `District` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `District` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`DistrictID`),
   KEY `province` (`ProvinceID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -75,14 +107,14 @@ DROP TABLE IF EXISTS `houses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `houses` (
-  `HouseNo` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
-  `Province` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `District` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `Sector` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `Cell` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `Village` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `HouseNo` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `Province` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `District` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Sector` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Cell` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Village` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ID` bigint NOT NULL,
-  `Status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`HouseNo`),
   KEY `fk_resident` (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -94,7 +126,7 @@ CREATE TABLE `houses` (
 
 LOCK TABLES `houses` WRITE;
 /*!40000 ALTER TABLE `houses` DISABLE KEYS */;
-INSERT INTO `houses` VALUES ('HS000001','Northern','Rulindo','Kinihira','Rebero','Kirwa',1199680081555266,'Available'),('HS000002','Kigali','Nyarugenge','Nyarugenge','Muhima','Muhima',1199680081555266,'Available');
+INSERT INTO `houses` VALUES ('HS000001','Northern','Rulindo','Kinihira','Rebero','Kirwa',1199680081555266,'Available'),('HS000002','Southern','Kamonyi','Rukoma','Murehe','Kabagabo',1199680081555266,'Available'),('HS000003','Southern','Kamonyi','Rukoma','Murehe','Kabagabo',123456789456231,'Available'),('HS000004','Southern','Kamonyi','Rukoma','Murehe','Uwingando',123456789456231,'Available');
 /*!40000 ALTER TABLE `houses` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -107,7 +139,7 @@ DROP TABLE IF EXISTS `provinces`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `provinces` (
   `ProvinceID` int NOT NULL AUTO_INCREMENT,
-  `Province` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Province` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`ProvinceID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -130,23 +162,24 @@ DROP TABLE IF EXISTS `resident`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `resident` (
-  `Identifier` varchar(8) COLLATE utf8mb4_general_ci NOT NULL,
-  `Firstname` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `Lastname` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Identifier` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Firstname` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Lastname` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `DoB` date DEFAULT NULL,
-  `Telephone` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Gender` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
+  `Telephone` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Gender` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ID` bigint DEFAULT NULL,
-  `FatherNames` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `MotherNames` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Province` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `District` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Sector` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Cell` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Village` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Citizen_Category` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `HouseNo` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Status` varchar(9) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `FatherNames` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `MotherNames` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Province` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `District` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Sector` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Cell` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Village` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Citizen_Category` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `HouseNo` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT '',
+  `Status` varchar(9) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `RegDate` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -157,7 +190,7 @@ CREATE TABLE `resident` (
 
 LOCK TABLES `resident` WRITE;
 /*!40000 ALTER TABLE `resident` DISABLE KEYS */;
-INSERT INTO `resident` VALUES ('21580327','MURINDWA','Emile','1996-01-01','787252201','Male',1199680081555266,'KABERA','MUKABUDAKIRANYA',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2024-12-03 00:00:00'),('38884712','RUKUNDO','Valens','1988-08-06','','Male',NULL,'MUSANGWA','KIRIBAZAYIRE',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2024-12-03 00:00:00'),('85202346','KAMAYIRESI ','Lenatta','2004-03-02','787252206','Male',1200480081555266,'MUSHIMIYIMANA Andrea','NYIRANZAYINO','Northern','Rulindo','Kinihira','Rebero','Kirwa','VillageLeader','HS000001','Available','2024-12-03 00:00:00'),('20482921','Roger','Roger','2024-12-04','726153025','Male',1122336655447788,'roger','rooger','','','','','','Landlord','HS000002','Pending','2024-12-05 15:20:25');
+INSERT INTO `resident` VALUES ('21580327','MURINDWA','Emile','1996-01-01','787252201','Male',1199680081555266,'KABERA','MUKABUDAKIRANYA','','','','','','Normal','HS000003','','Available','2024-12-03 00:00:00'),('38884712','RUKUNDO','Valens','1988-08-06','','Male',NULL,'MUSANGWA','KIRIBAZAYIRE',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',NULL,'2024-12-03 00:00:00'),('85202346','KAMAYIRESI ','Lenatta','2004-03-02','787252206','Male',1200480081555266,'MUSHIMIYIMANA Andrea','NYIRANZAYINO','Northern','Rulindo','Kinihira','Rebero','Kirwa','VillageLeader','HS000001','','Available','2024-12-03 00:00:00'),('20482921','Roger','Roger','2024-12-04','726153025','Male',1122336655447788,'roger','rooger','','','','','','Landlord','HS000002','','Pending','2024-12-05 15:20:25'),('23559550','CellLeader','James','2024-11-27','0726183050','Male',11990022334455,'James','Germaine',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',NULL,'2024-12-09 10:44:06'),('88329654','Landlord','Landlord','1999-12-12','726453625','Male',123456789456231,'Father Karim','Karera','','','','','','Landlord','HS000004','827ccb0eea8a706c4c34a16891f84e7b','Available','2024-12-09 22:16:16');
 /*!40000 ALTER TABLE `resident` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -170,7 +203,7 @@ DROP TABLE IF EXISTS `roles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
   `RoleID` int NOT NULL AUTO_INCREMENT,
-  `RoleName` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `RoleName` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`RoleID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -195,7 +228,7 @@ DROP TABLE IF EXISTS `sectors`;
 CREATE TABLE `sectors` (
   `SectorID` int NOT NULL AUTO_INCREMENT,
   `DistrictID` int NOT NULL,
-  `Sector` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Sector` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`SectorID`),
   KEY `district` (`DistrictID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=417 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -220,8 +253,8 @@ DROP TABLE IF EXISTS `status`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `status` (
   `StatusID` int NOT NULL AUTO_INCREMENT,
-  `Message` text COLLATE utf8mb4_general_ci NOT NULL,
-  `Description` tinytext COLLATE utf8mb4_general_ci,
+  `Message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `Description` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`StatusID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -245,21 +278,21 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `UserID` int NOT NULL AUTO_INCREMENT,
-  `Firstname` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Lastname` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Email` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `Password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT '',
-  `Role` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `Firstname` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Lastname` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Email` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ID` bigint NOT NULL,
-  `Province` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Telephone` varchar(13) COLLATE utf8mb4_general_ci NOT NULL,
-  `District` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `Sector` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `Cell` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `Village` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `Province` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Telephone` varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `District` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Sector` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Cell` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Village` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `Status` int DEFAULT NULL,
   PRIMARY KEY (`UserID`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -268,7 +301,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Mire','Raban','mireraban@gmail.com','123','Admin',1996802147483646,'Kigali City','+250728031695','Gasabo','Kimihurura','Kimihurura','Kamukina',2),(2,'Murungi','Eveline','muru@yahoo.fr','0000','RIB Officer',1199780081555277,'Northern','+250787252201','Burera','Butaro','Akavumu ','Muko',2),(3,'NYABYENDA','Cyprien','cyprien@yahoo.com','1234','Admin',1200081234567021,'Eastern','+752079876544','Nyagatare','Nyagatare','Akavumu ','Agasengesenge',2),(5,'MUTUYE','Emma','emma@gmail.com','Rab@','Admin',1199680081555098,'Western','+762079876544','Ngoma','Busoro','Akarambo ','Agakomashyo',1),(6,'Murerwa','Odile','murerwa@gmail.com','Hello123','Admin',120008000123003,'Eastern','+261079876544','Kayonza','Bushekeri','Akinyambo','Agasharu',1),(7,'Murungi','Eveline','mutekano@gmail.com','123','Admin',1199780081555277,'Northern','+250787252201','Burera','Butaro','Akavumu ','Muko',2),(8,'Asua','asua','asua@yopmail.com','827ccb0eea8a706c4c34a16891f84e7b','Admin',11996633002233,'Kigali City','0726183049','Nyarugenge','Bugeshi','Akabungo','Agahora',1);
+INSERT INTO `users` VALUES (1,'Mire','Raban','mireraban@gmail.com','123','Admin',1996802147483646,'Kigali City','+250728031695','Gasabo','Kimihurura','Kimihurura','Kamukina',2),(2,'Murungi','Eveline','muru@yahoo.fr','0000','RIB Officer',1199780081555277,'Northern','+250787252201','Burera','Butaro','Akavumu ','Muko',2),(3,'NYABYENDA','Cyprien','cyprien@yahoo.com','1234','Admin',1200081234567021,'Eastern','+752079876544','Nyagatare','Nyagatare','Akavumu ','Agasengesenge',2),(5,'MUTUYE','Emma','emma@gmail.com','Rab@','Admin',1199680081555098,'Western','+762079876544','Ngoma','Busoro','Akarambo ','Agakomashyo',1),(6,'Murerwa','Odile','murerwa@gmail.com','Hello123','Admin',120008000123003,'Eastern','+261079876544','Kayonza','Bushekeri','Akinyambo','Agasharu',1),(7,'Murungi','Eveline','mutekano@gmail.com','123','Admin',1199780081555277,'Northern','+250787252201','Burera','Butaro','Akavumu ','Muko',2),(8,'Asua','asua','asua@yopmail.com','827ccb0eea8a706c4c34a16891f84e7b','Admin',11996633002233,'Kigali City','0726183049','Nyarugenge','Bugeshi','Akabungo','Agahora',1),(9,'CellLeader','James','cell@yopmail.com','827ccb0eea8a706c4c34a16891f84e7b','Cell leader',11990022334455,'Southern','0726183051','Kamonyi','Rukoma','Murehe','Kabagabo',1),(10,'VillageLeader','Karim','village@yopmail.com','827ccb0eea8a706c4c34a16891f84e7b','Village leader',11990022330044,'Southern','0726183052','Kamonyi','Rukoma','Murehe','Kabagabo',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -282,7 +315,7 @@ DROP TABLE IF EXISTS `villages`;
 CREATE TABLE `villages` (
   `VillageID` int NOT NULL AUTO_INCREMENT,
   `CellID` int NOT NULL,
-  `Village` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Village` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`VillageID`),
   KEY `cell` (`CellID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9143 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -307,4 +340,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-06 14:21:37
+-- Dump completed on 2024-12-09 23:45:49

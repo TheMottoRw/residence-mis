@@ -203,9 +203,6 @@ if ($result->num_rows > 0) {
                 <option value=""><?php echo htmlspecialchars($record['Citizen_Category']); ?></option>
                 <option value="Normal" <?php echo $record['Citizen_Category'] == 'Normal' ? 'selected' : ''; ?>>Normal</option>
                 <option value="Landlord" <?php echo $record['Citizen_Category'] == 'Landlord' ? 'selected' : ''; ?>>Landlord</option>
-                <option value="VillageLeader" <?php echo $record['Citizen_Category'] == 'VillageLeader' ? 'selected' : ''; ?>>Village Leader</option>
-                <option value="CellLeader" <?php echo $record['Citizen_Category'] == 'CellLeader' ? 'selected' : ''; ?>>Cell Leader</option>
-                <option value="SectorLeader" <?php echo $record['Citizen_Category'] == 'SectorLeader' ? 'selected' : ''; ?>>Sector Leader</option>
             </select>
         </div>
         <div class="form-group">

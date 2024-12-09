@@ -1,7 +1,6 @@
 <?php
 // Start the session at the top, before any HTML output
 session_start();
-session_destroy();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -53,6 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['ID'] = $user['ID'];
 
         if($user['Role']=='Admin'){
+//            header("location:Dashboard.php");
             echo "<script type='text/javascript'> document.location = 'Dashboard.php'; </script>";
         }else{
             echo "<script type='text/javascript'> document.location = 'CertificateRequestsView.php'; </script>";
@@ -60,8 +60,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         exit();
     } else {
+        // Prepare and execute query to fetch user data
+        $query = "SELECT * FROM resident WHERE Telephone = :email AND password = :password";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(['email' => $email, 'password' => $password]);
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if($user){
+            $_SESSION['email'] = $user['Telephone'];
+            $_SESSION['password'] = $user['Password'];
+            $_SESSION['role'] = "Landlord";
+            $_SESSION['cell'] = $user['Cell'];
+            $_SESSION['village'] = $user['Village'];
+            $_SESSION['ID'] = $user['ID'];
+            echo "<script type='text/javascript'> document.location = 'CertificateRequestsView.php'; </script>";
+        }else{
+            echo "<script>alert('Invalid email or password.');</script>";
+        }
         // Invalid login
-        echo "<script>alert('Invalid email or password.');</script>";
     }
 }
 ?>
@@ -231,8 +247,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </div>
                                     <form action="#" method="POST">
                                         <div class="form-group">
-                                            <label for="email">Email</label>
-                                            <input type="email" class="form-control" id="email" name="email" required>
+                                            <label for="email">Email/Phone</label>
+                                            <input type="text" class="form-control" id="email" name="email" required>
                                             <small id="emailHelp" class="form-text text-muted">Never share your credentials with anyone else.</small>
                                         </div>
                                         <div class="form-group">

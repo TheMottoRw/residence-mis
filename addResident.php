@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $_POST['id'];
     $fathernames = $_POST['fathernames'];
     $mothernames = $_POST['mothernames'];
+    $password = md5($_POST['password']);
 
     // Generate the ResidentNo automatically
     $identifier = generateIdentifier($conn); // Get a unique 8-digit ResidentNo
@@ -72,15 +73,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<div class='alert alert-danger'><center>Resident No. should be exactly 8 digits.</center></div>";
     } else {
         // Prepare and execute insert statement (removed 'Identifier' from the query)
-        $stmt = $conn->prepare("INSERT INTO resident (Identifier,Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames) 
-                                VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO resident (Identifier,Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Password) 
+                                VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
 
         // Check if the query preparation was successful
         if ($stmt === false) {
             echo "<div class='alert alert-danger'>Error preparing statement: " . $conn->error . "</div>";
         } else {
             // Bind the parameters to the prepared statement
-            $stmt->bind_param("issssssss",$identifier, $firstname, $lastname, $dob, $telephone, $gender, $id, $fathernames, $mothernames);
+            $stmt->bind_param("isssssssss",$identifier, $firstname, $lastname, $dob, $telephone, $gender, $id, $fathernames, $mothernames,$password);
 
             // Execute the prepared statement
             if ($stmt->execute()) {
@@ -196,6 +197,10 @@ if ($result->num_rows > 0) {
         <div class="form-group">
             <label for="telephone">Telephone:</label>
             <input type="text" class="form-control" id="telephone" name="telephone">
+        </div>
+        <div class="form-group">
+            <label for="passsword">Default password:</label>
+            <input type="password" class="form-control" id="password" name="password">
         </div>
         <div class="form-group">
             <label for="gender">Gender:</label>

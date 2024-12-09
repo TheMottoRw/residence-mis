@@ -1,4 +1,4 @@
-<?php   
+<?php
 session_start(); // Ensure that the session is started
 
 include 'connect.php'; // Include database connection
@@ -13,7 +13,7 @@ if (isset($_SESSION['username'])) {
     // Fetch authorizer's details from the user table
     $sql = "SELECT Firstname, Lastname FROM users WHERE Username = ?";
     $stmt = $conn->prepare($sql);
-    
+
     // Check if prepare() failed
     if ($stmt === false) {
         die('MySQL prepare error: ' . $conn->error);
@@ -39,7 +39,6 @@ if (isset($_SESSION['username'])) {
 if (isset($_POST['identifier'])) {
     $identifier = $_POST['identifier'];
     $dob = $_POST['dob'];
-    echo $dob;
 
     // Check if the identifier is numeric (for ID search) or alphanumeric (for ResidentNo)
     if (is_numeric($identifier)) {
@@ -52,7 +51,7 @@ if (isset($_POST['identifier'])) {
             die('MySQL prepare error: ' . $conn->error);
         }
 
-        $stmt->bind_param("iis", $identifier, $identifier,$dob); // Bind both ID and ResidentNo
+        $stmt->bind_param("iis", $identifier, $identifier, $dob); // Bind both ID and ResidentNo
     } else {
         // If identifier is alphanumeric, assume it's a ResidentNo (or other unique identifier)
         $sql = "SELECT * FROM resident WHERE Identifier = ? AND DoB = ?";
@@ -63,7 +62,7 @@ if (isset($_POST['identifier'])) {
             die('MySQL prepare error: ' . $conn->error);
         }
 
-        $stmt->bind_param("ss", $identifier,$dob); // Bind for string (ResidentNo)
+        $stmt->bind_param("ss", $identifier, $dob); // Bind for string (ResidentNo)
     }
 
     $stmt->execute();
@@ -136,8 +135,8 @@ if (isset($_POST['identifier'])) {
         }
 
         .btn {
-            background-color: #3498db;  
-            color: white;  
+            background-color: #3498db;
+            color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
@@ -182,9 +181,11 @@ if (isset($_POST['identifier'])) {
             body * {
                 visibility: hidden;
             }
+
             .certificate-container, .certificate-container * {
                 visibility: visible;
             }
+
             .certificate-container {
                 position: absolute;
                 left: 0;
@@ -205,7 +206,9 @@ if (isset($_POST['identifier'])) {
 
 <header>
     <h1>Citizen's Residence Management System (CRMS)</h1>
-    <p>Request your Residence Certificate here. After approval, you can download it. For system users, you can click here to <a href="login.php"><font color="black"><h2>Login</h2></a></font>||<a href="index.php"><font color="black">Back to Homepage</a></font></p>
+    <p>Request your Residence Certificate here. After approval, you can download it. For system users, you can click
+        here to <a href="login.php"><font color="black"><h2>Login</h2></a></font>||<a href="Index.php"><font
+                    color="black">Back to Homepage</a></font></p>
 </header>
 
 <!-- Main Container with Left and Right Sections -->
@@ -214,14 +217,17 @@ if (isset($_POST['identifier'])) {
     <!-- Right Side - Certificate Container -->
     <?php if ($resident || isset($error_message)): ?>
         <div class="certificate-container">
-            <p><h2><b>REPUBLIC OF RWANDA </b></h2></p>
+            <p>
+            <h2><b>REPUBLIC OF RWANDA </b></h2></p>
             <p><img src="images/National.jpg" width="150" height="150"></p><br>
 
             <div class="certificate-header">
-                <p><center><u><b>CERTIFICATE OF RESIDENCE</b></u></center></p>
+                <p>
+                <center><u><b>CERTIFICATE OF RESIDENCE</b></u></center>
+                </p>
             </div>
             <?php
-            if(isset($_GET['CertificateRequestSubmit'])){
+            if (isset($_POST['CertificateRequestSubmit'])) {
                 $residentId = $_POST['ResidentId'];
                 $residentNo = $_POST['ResidentNo'];
                 $sql = "INSERT INTO certificate_requests SET ID = ?, ResidentNo = ?";
@@ -232,12 +238,13 @@ if (isset($_POST['identifier'])) {
                     die('MySQL prepare error: ' . $conn->error);
                 }
 
-                $stmt->bind_param("ii", $residentId,$residentNo);
+                $stmt->bind_param("ss", $residentId, $residentNo);
                 if ($stmt->execute()) {
                     echo "<div class='alert alert-success'><center>Request sent successful</center>.</div>";
                 } else {
                     echo "<div class='alert alert-danger'>Error: " . $stmt->error . "</div>";
-                }}
+                }
+            }
             ?>
 
             <div class="certificate-body">
@@ -245,7 +252,9 @@ if (isset($_POST['identifier'])) {
                     <p class="error-message"><?php echo $error_message; ?></p>
                 <?php else: ?>
                     <p><strong>This certifies that:</strong></p>
-                    <p><strong>Name:</strong> <?php echo htmlspecialchars($resident['Firstname'] . ' ' . $resident['Lastname']); ?></p>
+                    <p>
+                        <strong>Name:</strong> <?php echo htmlspecialchars($resident['Firstname'] . ' ' . $resident['Lastname']); ?>
+                    </p>
                     <p><strong>DoB:</strong> <?php echo htmlspecialchars($resident['DoB']); ?></p>
                     <p><strong>Gender:</strong> <?php echo htmlspecialchars($resident['Gender']); ?></p>
                     <p><strong>Resident ID:</strong> <?php echo htmlspecialchars($resident['ID']); ?></p>
@@ -253,20 +262,45 @@ if (isset($_POST['identifier'])) {
                     <p><strong>Father's Name:</strong> <?php echo htmlspecialchars($resident['FatherNames']); ?></p>
                     <p><strong>Mother's Name:</strong> <?php echo htmlspecialchars($resident['MotherNames']); ?></p>
                     <p><strong>Resides at</strong><br>
-                        <?php echo htmlspecialchars($resident['Province'] . ', ' . $resident['District'] . ', ' . $resident['Sector'] . ', ' . $resident['Cell']); ?></p>
+                        <?php echo htmlspecialchars($resident['Province'] . ', ' . $resident['District'] . ', ' . $resident['Sector'] . ', ' . $resident['Cell']); ?>
+                    </p>
                 <?php endif; ?>
             </div>
 
             <div class="certificate-footer">
                 <p><strong>Issued By:</strong> LODA</p>
                 <p class="date"><strong>Application Date:</strong> <?php echo date('F d, Y'); ?></p>
-                </div>
-            
+            </div>
+
             <!-- Download certificate button will be shown after approval -->
-            <form method="POST" action="certificateRequest.php?CertificateRequestSubmit">
-                <input type="hidden" name="ResidentId" value="<?= $resident['ID']; ?>">
-                <input type="hidden" name="ResidentNo" value="<?= $resident['Identifier']; ?>">
-                <input type="submit" class="btn" value="Approval Request">
+            <form method="POST" action="certificateRequest.php">
+                <?php
+
+                $sql1 = "SELECT cr.*,r.HouseNo FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo WHERE ResidentNo = ?";
+                $stmt1 = $conn->prepare($sql1);
+                $stmt1->bind_param("s", $identifier); // Bind for string (ResidentNo)
+                $stmt1->execute();
+                $crResult = $stmt1->get_result()->fetch_assoc();
+                if($crResult){
+                    if($crResult['HouseOwnerApproval']=='1' && $crResult['VillageLeaderApproval']=='1' && $crResult['CellLeaderApproval']=='1')
+                        echo "<button class='btn btn-primary' onclick='window.print()'>Print certificate</button>";
+                    else if($crResult['HouseOwnerApproval']!='1') echo "Status:<b>Waiting Landlord to approve</b>";
+                    else if($crResult['VillageLeaderApproval']!='1') echo "Status:<b>Waiting Village leader to approve</b>";
+                    else echo "Status:<b>Waiting Cell leader to approve</b>";
+                }else{
+
+                if ($result->num_rows > 0 && !isset($_POST['CertificateRequestSubmit'])) {
+                    ?>
+                    <input type="hidden" name="CertificateRequestSubmit">
+                    <input type="hidden" name="identifier" value="<?= $identifier; ?>">
+                    <input type="hidden" name="dob" value="<?= $dob; ?>">
+                    <input type="hidden" name="ResidentId" value="<?= $resident['ID']; ?>">
+                    <input type="hidden" name="ResidentNo" value="<?= $resident['Identifier']; ?>">
+                    <input type="submit" class="btn" value="Approval Request">
+                    <?php
+                }
+                }
+                ?>
             </form>
         </div>
     <?php endif; ?>

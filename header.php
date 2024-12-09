@@ -24,7 +24,7 @@ session_controller();
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <?php
-        if($_SESSION['role']=='admin'){?>
+        if($_SESSION['role']=='Admin'){?>
             <ul class="navbar-nav mr-auto">
                 <!-- <li class="nav-item active">
                     <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
