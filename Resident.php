@@ -69,10 +69,10 @@ $offset = ($page - 1) * $records_per_page;
 $search_query = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 
 // Prepare the SQL query to include the search condition and order by Identifier descending
-$sql = "SELECT Identifier, Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Province, District, Sector, Cell, Village, citizen_category, HouseNo, Status, RegDate 
+$sql = "SELECT Identifier, Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Province, District, Sector, Cell, Village, Citizen_Category, HouseNo, Status, RegDate 
         FROM resident
         WHERE HouseNo IS NOT NULL 
-        AND CONCAT_WS(' ', Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Province, District, Sector, Cell, Village, citizen_category, HouseNo, Status, RegDate) LIKE ? 
+        AND CONCAT_WS(' ', Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Province, District, Sector, Cell, Village, Citizen_Category, HouseNo, Status, RegDate) LIKE ? 
         ORDER BY Identifier DESC 
         LIMIT ? OFFSET ?";
 
@@ -146,6 +146,7 @@ if ($result->num_rows > 0) {
             <th scope='col'>Cell</th>
             <th scope='col'>Village</th>
             <th scope='col'>HouseNo</th>
+            <th scope='col'>Category</th>
             <th scope='col'>Status</th>
             <th scope='col'>Action</th>
           </tr>";
@@ -172,6 +173,7 @@ if ($result->num_rows > 0) {
                 <td>" . htmlspecialchars($row["Cell"]) . "</td>
                 <td>" . htmlspecialchars($row["Village"]) . "</td>
                 <td>" . htmlspecialchars($row["HouseNo"]) . "</td>
+                <td>" . htmlspecialchars($row["Citizen_Category"]) . "</td>
                 <td style='color: red;'>" . htmlspecialchars($row["Status"]) . "</td>
                 <td><a href='updateResident.php?identifier=" . htmlspecialchars($row["Identifier"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a></td>
               </tr>";

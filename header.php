@@ -23,6 +23,61 @@ session_controller();
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <?php
+        if($_SESSION['role']=='admin'){?>
+            <ul class="navbar-nav mr-auto">
+                <!-- <li class="nav-item active">
+                    <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
+                </li>-->
+                <li>
+                    <img src="images/logo.jpg" width="50" height="50" alt="CRMS Logo">
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="Dashboard.php">Dashboard</a>
+                </li>
+                <li class="nav-item dropdown active">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                        <b>Registration</b>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="addResident.php">Citizen</a>
+                        <a class="dropdown-item" href="addStatus.php">Resident_Status</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="addHouses.php">House</a>
+                        <a class="dropdown-item" href="addResident.php">Landlord/Landlady</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="addUser.php">Users</a>
+                        <a class="dropdown-item" href="addUserrole.php">Role</a>
+                    </div>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link enabled" href="certificate.php">Certificate</a>
+                </li>
+                <li class="nav-item dropdown active">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                        <b>Reports</b>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="ListOfCitizens.php">Citizens</a>
+                        <a class="dropdown-item" href="Resident.php">Residents</a>
+                        <a class="dropdown-item" href="Status.php">Resident_Status</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="houses.php">House</a>
+                        <a class="dropdown-item" href="Landlord.php">Landlord/Landlady</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="Users.php">Users</a>
+                        <a class="dropdown-item" href="Role.php">Role</a>
+                    </div>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="login.php">Logout</a>
+                </li>
+            </ul>
+
+            <?php
+        }else{?>
+
         <ul class="navbar-nav mr-auto">
             <!-- <li class="nav-item active">
                 <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
@@ -32,46 +87,16 @@ session_controller();
             </li>
 
             <li class="nav-item active">
-                <a class="nav-link" href="Dashboard.php">Dashboard</a>
+                <a class="nav-link" href="CertificateRequestsView.php">Certificate Requests</a>
             </li>
-            <li class="nav-item dropdown active">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                    <b>Registration</b>
-                </a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="addResident.php">Citizen</a>
-                    <a class="dropdown-item" href="addStatus.php">Resident_Status</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="addHouses.php">House</a>
-                    <a class="dropdown-item" href="addResident.php">Landlord/Landlady</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="addUser.php">Users</a>
-                    <a class="dropdown-item" href="addUserrole.php">Role</a>
-                </div>
-            </li>
-            <li class="nav-item active">
-                <a class="nav-link enabled" href="certificate.php">Certificate</a>
-            </li>
-            <li class="nav-item dropdown active">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                    <b>Reports</b>
-                </a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="ListOfCitizens.php">Citizens</a>
-                    <a class="dropdown-item" href="Resident.php">Residents</a>
-                    <a class="dropdown-item" href="Status.php">Resident_Status</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="houses.php">House</a>
-                    <a class="dropdown-item" href="Landlord.php">Landlord/Landlady</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="Users.php">Users</a>
-                    <a class="dropdown-item" href="Role.php">Role</a>
-                </div>
-            </li>
+
             <li class="nav-item active">
                 <a class="nav-link" href="login.php">Logout</a>
             </li>
         </ul>
+            <?php
+        }
+        ?>
     </div>
 </nav>
 <!-- End Navigation Bar -->

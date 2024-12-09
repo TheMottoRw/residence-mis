@@ -38,11 +38,13 @@ if (isset($_SESSION['username'])) {
 // Check if the form is submitted with an identifier
 if (isset($_POST['identifier'])) {
     $identifier = $_POST['identifier'];
+    $dob = $_POST['dob'];
+    echo $dob;
 
     // Check if the identifier is numeric (for ID search) or alphanumeric (for ResidentNo)
     if (is_numeric($identifier)) {
         // If identifier is numeric, it could be either ID or ResidentNo
-        $sql = "SELECT * FROM resident WHERE ID = ? OR Identifier = ?";
+        $sql = "SELECT * FROM resident WHERE (ID = ? OR Identifier = ?) AND DoB = ?";
         $stmt = $conn->prepare($sql);
 
         // Check if prepare() failed
@@ -50,10 +52,10 @@ if (isset($_POST['identifier'])) {
             die('MySQL prepare error: ' . $conn->error);
         }
 
-        $stmt->bind_param("ii", $identifier, $identifier); // Bind both ID and ResidentNo
+        $stmt->bind_param("iis", $identifier, $identifier,$dob); // Bind both ID and ResidentNo
     } else {
         // If identifier is alphanumeric, assume it's a ResidentNo (or other unique identifier)
-        $sql = "SELECT * FROM resident WHERE Identifier = ?";
+        $sql = "SELECT * FROM resident WHERE Identifier = ? AND DoB = ?";
         $stmt = $conn->prepare($sql);
 
         // Check if prepare() failed
@@ -61,7 +63,7 @@ if (isset($_POST['identifier'])) {
             die('MySQL prepare error: ' . $conn->error);
         }
 
-        $stmt->bind_param("s", $identifier); // Bind for string (ResidentNo)
+        $stmt->bind_param("ss", $identifier,$dob); // Bind for string (ResidentNo)
     }
 
     $stmt->execute();
@@ -78,6 +80,7 @@ if (isset($_POST['identifier'])) {
     $stmt->close();
     $conn->close();
 }
+
 ?>
 
 <?php include 'connect.php'; ?>
@@ -217,6 +220,25 @@ if (isset($_POST['identifier'])) {
             <div class="certificate-header">
                 <p><center><u><b>CERTIFICATE OF RESIDENCE</b></u></center></p>
             </div>
+            <?php
+            if(isset($_GET['CertificateRequestSubmit'])){
+                $residentId = $_POST['ResidentId'];
+                $residentNo = $_POST['ResidentNo'];
+                $sql = "INSERT INTO certificate_requests SET ID = ?, ResidentNo = ?";
+                $stmt = $conn->prepare($sql);
+
+                // Check if prepare() failed
+                if ($stmt === false) {
+                    die('MySQL prepare error: ' . $conn->error);
+                }
+
+                $stmt->bind_param("ii", $residentId,$residentNo);
+                if ($stmt->execute()) {
+                    echo "<div class='alert alert-success'><center>Request sent successful</center>.</div>";
+                } else {
+                    echo "<div class='alert alert-danger'>Error: " . $stmt->error . "</div>";
+                }}
+            ?>
 
             <div class="certificate-body">
                 <?php if (isset($error_message)): ?>
@@ -241,7 +263,11 @@ if (isset($_POST['identifier'])) {
                 </div>
             
             <!-- Download certificate button will be shown after approval -->
-            <a href="javascript:window.print();" class="btn">Approval Request</a>
+            <form method="POST" action="certificateRequest.php?CertificateRequestSubmit">
+                <input type="hidden" name="ResidentId" value="<?= $resident['ID']; ?>">
+                <input type="hidden" name="ResidentNo" value="<?= $resident['Identifier']; ?>">
+                <input type="submit" class="btn" value="Approval Request">
+            </form>
         </div>
     <?php endif; ?>
 

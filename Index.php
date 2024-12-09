@@ -40,7 +40,7 @@
         }
 
         /* Updated styles for the text input field */
-        input[type="tel"], input[type="submit"] {
+        input[type="tel"], input[type="date"], input[type="submit"] {
             width: 100%;
             padding: 16px; /* Increased padding for larger input */
             margin: 8px 0;
@@ -136,6 +136,10 @@
             <label for="identifier">Enter Your Resident ID or RegNo</label>
             <!-- Change the input type to "tel" and add pattern for numeric input -->
             <input type="tel" id="identifier" name="identifier" pattern="[0-9]*" inputmode="numeric" required placeholder="Enter your Resident ID or number" title="Only numeric values are allowed">
+
+            <label for="identifier">Select Your Date of birth</label>
+            <!-- Change the input type to "tel" and add pattern for numeric input -->
+            <input type="date" id="dob" name="dob" required placeholder="Select your date of birth">
 
             <input type="submit" value="Request Certificate" class="btn">
         </form>

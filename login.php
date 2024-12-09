@@ -1,6 +1,7 @@
 <?php
 // Start the session at the top, before any HTML output
 session_start();
+session_destroy();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -48,10 +49,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['password'] = $user['Password'];
         $_SESSION['role'] = $user['Role'];
         $_SESSION['cell'] = $user['Cell'];
+        $_SESSION['village'] = $user['Village'];
+        $_SESSION['ID'] = $user['ID'];
 
+        if($user['Role']=='Admin'){
+            echo "<script type='text/javascript'> document.location = 'Dashboard.php'; </script>";
+        }else{
+            echo "<script type='text/javascript'> document.location = 'CertificateRequestsView.php'; </script>";
+        }
 
-
-        echo "<script type='text/javascript'> document.location = 'Dashboard.php'; </script>";
         exit();
     } else {
         // Invalid login

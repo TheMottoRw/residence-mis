@@ -2,7 +2,7 @@
 <?php include 'connect.php'; ?>
 <?php
 // Database connection
-$conn = new mysqli('localhost', 'root', '', 'crms'); // Update with your database credentials
+$conn = new mysqli('localhost', 'super', '', 'crms'); // Update with your database credentials
 
 // Check connection
 if ($conn->connect_error) {
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Prepare and execute update statement
     $stmt = $conn->prepare("UPDATE houses SET 
-        OwnerID = ?, 
+        ID = ?, 
         Province = ?, 
         District = ?, 
         Sector = ?, 
@@ -62,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $sector, 
         $cell, 
         $village, 
-        $houseno,
-        $status
+        $status,
+        $houseno
     );
 
     // Execute the query
@@ -113,7 +113,7 @@ if ($result->num_rows > 0) {
     <div class="form-group">
             <label for="ownerid">House Owner:</label>
             <select class="form-control" id="ownerid" name="ownerid" required>
-            <option value=""><?php echo htmlspecialchars($record['OwnerID']); ?></option>
+            <option value=""><?php echo htmlspecialchars($record['ID']); ?></option>
                 <?php 
                     // Dynamically populate the status dropdown
                     foreach ($owneridOptions as $ownerid) {

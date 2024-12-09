@@ -29,7 +29,7 @@
 
 <?php
 // Database connection
-$conn = new mysqli('localhost', 'root', '', 'crms'); // Update with your database credentials
+$conn = new mysqli('localhost', 'super', '', 'crms'); // Update with your database credentials
 
 // Check connection
 if ($conn->connect_error) {
