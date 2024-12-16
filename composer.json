@@ -1,0 +1,7 @@
+{
+    "name": "crms/crms",
+    "description": "A simple CRM application",
+    "require": {
+      "phpmailer/phpmailer": "^6.9"
+    }
+  }

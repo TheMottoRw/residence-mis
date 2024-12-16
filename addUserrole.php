@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <form action="addUserrole.php" method="POST">
         <div class="form-group">
             <label for="firstname">User's Role:</label>
-            <input type="text" class="form-control" id="rolename" name="rolename" required>
+            <input type="text" class="form-control" pattern="[A-Za-z _]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" id="rolename" name="rolename" required>
         </div>
         <div class="form-group text-center">
             <button type="submit" class="btn btn-custom">Submit</button>

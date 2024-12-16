@@ -181,7 +181,7 @@ CREATE TABLE `roles` (
 
 LOCK TABLES `roles` WRITE;
 /*!40000 ALTER TABLE `roles` DISABLE KEYS */;
-INSERT INTO `roles` VALUES (1,'Admin'),(2,'SuperAdmin'),(3,'RIB Officer'),(4,'Village leader'),(5,'Cell Leader'),(6,'Sector Leader');
+INSERT INTO `roles` VALUES (1,'Admin'),(2,'rootAdmin'),(3,'RIB Officer'),(4,'Village leader'),(5,'Cell Leader'),(6,'Sector Leader');
 /*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 UNLOCK TABLES;
 

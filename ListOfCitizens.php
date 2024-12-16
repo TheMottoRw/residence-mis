@@ -7,11 +7,14 @@
     <title>All_Citizens</title>
     <link rel="stylesheet" href="bootstrap/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.26/jspdf.plugin.autotable.min.js"></script> <!-- Add autoTable plugin -->
+
     <style>
         /* Compact table style */
         table {
             align: Center;
-            table-layout: fixed;
+            table-layout: auto;
             width: 100%;
             font-size: 12px; /* Reduce the font size */
         }
@@ -58,7 +61,7 @@ if ($conn->connect_error) {
 }
 
 // Number of records to display per page
-$records_per_page = 5;
+$records_per_page = 7;
 
 // Get the current page number from query string, default is 1
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -73,7 +76,7 @@ $search_query = isset($_GET['search']) ? $conn->real_escape_string($_GET['search
 $sql = "SELECT Identifier, Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Province, District, Sector, Cell, Village, citizen_category, HouseNo, Status,RegDate 
         FROM resident 
         WHERE CONCAT_WS(' ', Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Province, District, Sector, Cell, Village, citizen_category, HouseNo, Status,RegDate) LIKE ? 
-        ORDER BY Identifier DESC
+        ORDER BY RegDate DESC
         LIMIT ? OFFSET ?";
 
 // Prepare and execute the statement
@@ -105,7 +108,7 @@ if ($result->num_rows > 0) {
     echo "<thead>";
     // Title and button row
     echo "<tr>
-            <th colspan='9' style='text-align: left; background-color: #f8f9fa;'>
+            <th colspan='16' style='text-align: left; background-color: #f8f9fa;'>
                 <div style='display: flex; align-items: center;'>
                     <div style='margin-right: 10px;'>
                         <a class='small' href='addResident.php'>
@@ -122,16 +125,14 @@ if ($result->num_rows > 0) {
                         <h2 class='text-center'>List Of All Citizens</h2>
                     </div>
                      <div style='margin-right: 10px;'>
-                        <a class='small' href='ReportGeneration.php'>
-                            <button class='btn btn-primary'><b>GenerateReport</b></button>
-                        </a>
+                        <button class='btn btn-primary' id='generateReportButton'><b>DownloadReport</b></button>
                     </div>
                 </div>
             </th>
           </tr>";
     // Column headers
     echo "<tr>
-            <th scope='col'>Resident   N<u>o</u></th>
+            <th scope='col'>RegNo</th>
             <th scope='col'>FirstName</th>
             <th scope='col'>LastName</th>
             <th scope='col'>DoB</th>
@@ -150,7 +151,7 @@ if ($result->num_rows > 0) {
     // Output data for each row
     while ($row = $result->fetch_assoc()) {
         echo "<tr>
-                <th>" . htmlspecialchars($row["Identifier"]) . "</th>
+                <td>" . htmlspecialchars($row["Identifier"]) . "</td>
                 <td>" . htmlspecialchars($row["Firstname"]) . "</td>
                 <td>" . htmlspecialchars($row["Lastname"]) . "</td>
                 <td>" . htmlspecialchars($row["DoB"]) . "</td>
@@ -159,7 +160,9 @@ if ($result->num_rows > 0) {
                 <td>" . htmlspecialchars($row["ID"]) . "</td>
                 <td>" . htmlspecialchars($row["FatherNames"]) . "</td>
                 <td>" . htmlspecialchars($row["MotherNames"]) . "</td>
-                <td><a href='updateResident.php?identifier=" . htmlspecialchars($row["Identifier"]) . "' style='color: red;'>Assign a House</a> &nbsp&nbsp||&nbsp&nbsp <a href='updateCitizen.php?identifier=" . htmlspecialchars($row["Identifier"]) . "' style='color: red;'><img src='images/edit.jpg' width='30px' height='30px'></a></td>
+                <td><a href='updateResident.php?identifier=" . htmlspecialchars($row["Identifier"]) . "' style='color: red;'>Assign a House</a> &nbsp&nbsp||&nbsp&nbsp 
+                    <a href='updateCitizen.php?identifier=" . htmlspecialchars($row["Identifier"]) . "' style='color: red;'><img src='images/edit.jpg' width='30px' height='30px'></a>&nbsp&nbsp||&nbsp&nbsp
+                    <a href='deleteCitizen.php?identifier=" . htmlspecialchars($row["Identifier"]) . "' style='color: red;'>Delete</a></td>
               </tr>";
     }
     
@@ -210,7 +213,44 @@ if ($result->num_rows > 0) {
 // Close connection
 $conn->close();
 ?>
+<script>
+    document.getElementById('generateReportButton').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');  // Landscape mode
+
+        // Set title
+        doc.setFontSize(18);
+        doc.text('Registered Citizens Report', 210, 10, null, null, 'center');
+        doc.setFontSize(10);
+        doc.text('Generated on: ' + new Date().toLocaleString(), 210, 20, null, null, 'center');
+
+        // Define table headers
+        const headers = ['RegNo','FirstName', 'LastName', 'DoB', 'Telephone', 'Gender', 'ID', 'Father\'s Name', 'Mother\'s Name'];
+
+        // Collect table data
+        let tableData = [];
+        document.querySelectorAll('table tbody tr').forEach(row => {
+            let rowData = [];
+            row.querySelectorAll('td').forEach(cell => {
+                rowData.push(cell.textContent.trim());
+            });
+            tableData.push(rowData);
+        });
+
+        // Use autoTable to add data to PDF
+        doc.autoTable({
+            head: [headers], // Set the table headers
+            body: tableData, // Add the table data
+            startY: 30,  // Start position of the table
+            theme: 'striped',  // Optional styling
+            margin: { top: 10, left: 10, right: 10, bottom: 10 }
+        });
+
+        // Save the PDF
+        doc.save('Citizens_Registered_Report.pdf');
+    });
+</script>
 <script src="bootstrap/jquery.slim.js"></script>
-<script src="bootstrap/bootstrap.bundle.js"></script>
+<script src="bootstrap/bootstrap.bundle.js"></script>\
 </body>
 </html>

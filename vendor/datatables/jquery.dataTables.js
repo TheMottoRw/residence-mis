@@ -10116,7 +10116,7 @@
 		 *   parameters with the values that DataTables has readied for sending. An
 		 *   object may be returned which will be merged into the DataTables
 		 *   defaults, or you can add the items to the object that was passed in and
-		 *   not return anything from the function. This supersedes `fnServerParams`
+		 *   not return anything from the function. This rootsedes `fnServerParams`
 		 *   from DataTables 1.9-.
 		 *
 		 * * `dataSrc` - By default DataTables will look for the property `data` (or
@@ -10127,7 +10127,7 @@
 		 *   it my be used as a function. As a function it takes a single parameter,
 		 *   the JSON returned from the server, which can be manipulated as
 		 *   required, with the returned value being that used by DataTables as the
-		 *   data source for the table. This supersedes `sAjaxDataProp` from
+		 *   data source for the table. This rootsedes `sAjaxDataProp` from
 		 *   DataTables 1.9-.
 		 *
 		 * * `success` - Should not be overridden it is used internally in
@@ -10151,7 +10151,7 @@
 		 *    as the only parameter
 		 * 3. _object_ - DataTables settings object for the table
 		 *
-		 * Note that this supersedes `fnServerData` from DataTables 1.9-.
+		 * Note that this rootsedes `fnServerData` from DataTables 1.9-.
 		 *
 		 *  @type string|object|function
 		 *  @default null
@@ -10965,7 +10965,7 @@
 	
 		/**
 		 * __Deprecated__ The functionality provided by this parameter has now been
-		 * superseded by that provided through `ajax`, which should be used instead.
+		 * rootseded by that provided through `ajax`, which should be used instead.
 		 *
 		 * This parameter allows you to override the default function which obtains
 		 * the data from the server so something more suitable for your application.
@@ -10991,7 +10991,7 @@
 	
 		/**
 		 * __Deprecated__ The functionality provided by this parameter has now been
-		 * superseded by that provided through `ajax`, which should be used instead.
+		 * rootseded by that provided through `ajax`, which should be used instead.
 		 *
 		 *  It is often useful to send extra data to the server when making an Ajax
 		 * request - for example custom filtering information, and this callback
@@ -11869,7 +11869,7 @@
 	
 		/**
 		 * __Deprecated__ The functionality provided by this parameter has now been
-		 * superseded by that provided through `ajax`, which should be used instead.
+		 * rootseded by that provided through `ajax`, which should be used instead.
 		 *
 		 * By default DataTables will look for the property `data` (or `aaData` for
 		 * compatibility with DataTables 1.9-) when obtaining data from an Ajax
@@ -11890,7 +11890,7 @@
 	
 		/**
 		 * __Deprecated__ The functionality provided by this parameter has now been
-		 * superseded by that provided through `ajax`, which should be used instead.
+		 * rootseded by that provided through `ajax`, which should be used instead.
 		 *
 		 * You can instruct DataTables to load data from an external
 		 * source using this parameter (use aData if you want to pass data in you
@@ -12084,7 +12084,7 @@
 	
 		/**
 		 * __Deprecated__ The functionality provided by this parameter has now been
-		 * superseded by that provided through `ajax`, which should be used instead.
+		 * rootseded by that provided through `ajax`, which should be used instead.
 		 *
 		 * Set the HTTP method that is used to make the Ajax call for server-side
 		 * processing or Ajax sourced data.
@@ -14249,7 +14249,7 @@
 			 * Type detection functions.
 			 *
 			 * The functions defined in this object are used to automatically detect
-			 * a column's type, making initialisation of DataTables super easy, even
+			 * a column's type, making initialisation of DataTables root easy, even
 			 * when complex data is in the table.
 			 *
 			 * The functions defined take two parameters:

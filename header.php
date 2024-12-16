@@ -24,7 +24,7 @@ session_controller();
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <?php
-        if($_SESSION['role']=='admin'){?>
+        if($_SESSION['role']=='Admin'){?>
             <ul class="navbar-nav mr-auto">
                 <!-- <li class="nav-item active">
                     <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
@@ -62,6 +62,7 @@ session_controller();
                         <a class="dropdown-item" href="ListOfCitizens.php">Citizens</a>
                         <a class="dropdown-item" href="Resident.php">Residents</a>
                         <a class="dropdown-item" href="Status.php">Resident_Status</a>
+                        <a class="dropdown-item" href="CitizenNoHouses.php">Non Tenants</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="houses.php">House</a>
                         <a class="dropdown-item" href="Landlord.php">Landlord/Landlady</a>
@@ -71,7 +72,7 @@ session_controller();
                     </div>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="login.php">Logout</a>
+                    <a class="nav-link" href="Logout.php">Logout</a>
                 </li>
             </ul>
 
@@ -91,7 +92,15 @@ session_controller();
             </li>
 
             <li class="nav-item active">
-                <a class="nav-link" href="login.php">Logout</a>
+                <a class="nav-link" href="myHouses.php">My House</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="tenants.php">Tenants</a>
+            </li>
+            <a class="dropdown-item" href="CitizenNoHouses.php">Non Tenants</a>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="Logout.php">Logout</a>
             </li>
         </ul>
             <?php

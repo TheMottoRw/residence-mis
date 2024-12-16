@@ -138,7 +138,7 @@ if ($result->num_rows > 0) {
         </div>
         <div class="form-group">
             <label for="telephone">Telephone:</label>
-            <input type="text" class="form-control" id="telephone" name="telephone" value="<?php echo htmlspecialchars($record['Telephone']); ?>" required>
+            <input type="text" class="form-control" pattern="[0-9]*" inputmode="numeric" id="telephone" name="telephone" value="<?php echo htmlspecialchars($record['Telephone']); ?>" required>
         </div>
         <div class="form-group">
             <label for="gender">Gender:</label>
@@ -150,15 +150,15 @@ if ($result->num_rows > 0) {
         </div>
         <div class="form-group">
             <label for="id">ID:</label>
-            <input type="text" class="form-control" id="id" name="id" value="<?php echo htmlspecialchars($record['ID']); ?>" required>
+            <input type="text" class="form-control" id="id" name="id" pattern="[0-9]*" inputmode="numeric" value="<?php echo htmlspecialchars($record['ID']); ?>" required>
         </div>
         <div class="form-group">
             <label for="district">MotherNames:</label>
-            <input type="text" class="form-control" id="mothernames" name="mothernames" value="<?php echo htmlspecialchars($record['MotherNames']); ?>" required>
+            <input type="text" class="form-control" id="mothernames" name="mothernames" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed!" value="<?php echo htmlspecialchars($record['MotherNames']); ?>" required>
         </div>
         <div class="form-group">
             <label for="district">FatherNames:</label>
-            <input type="text" class="form-control" id="fathernames" name="fathernames" value="<?php echo htmlspecialchars($record['FatherNames']); ?>" required>
+            <input type="text" class="form-control" id="fathernames" name="fathernames" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed!" value="<?php echo htmlspecialchars($record['FatherNames']); ?>" required>
         </div>
         <div class="form-group text-center">
             <button type="submit" class="btn btn-custom">Update</button>

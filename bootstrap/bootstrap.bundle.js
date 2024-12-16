@@ -49,11 +49,11 @@
     return _extends$1.apply(this, arguments);
   }
 
-  function _inheritsLoose(subClass, superClass) {
-    subClass.prototype = Object.create(superClass.prototype);
+  function _inheritsLoose(subClass, rootClass) {
+    subClass.prototype = Object.create(rootClass.prototype);
     subClass.prototype.constructor = subClass;
 
-    _setPrototypeOf(subClass, superClass);
+    _setPrototypeOf(subClass, rootClass);
   }
 
   function _setPrototypeOf(o, p) {

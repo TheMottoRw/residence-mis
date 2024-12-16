@@ -2427,7 +2427,7 @@ var helpers = {
 			helpers.extend(ChartElement.prototype, extensions);
 		}
 
-		ChartElement.__super__ = me.prototype;
+		ChartElement.__root__ = me.prototype;
 		return ChartElement;
 	},
 

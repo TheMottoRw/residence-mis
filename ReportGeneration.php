@@ -71,10 +71,10 @@ $offset = ($page - 1) * $records_per_page;
 $search_query = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 
 // Prepare the SQL query to include the search condition and order by Identifier descending
-$sql = "SELECT Identifier, Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Province, District, Sector, Cell, Village, citizen_category, HouseNo, Status, RegDate 
-        FROM resident
+$sql = "SELECT t.Identifier, t.Firstname, t.Lastname, t.DoB, t.Telephone, t.Gender, t.ID, t.FatherNames, t.MotherNames, p.Province, d.District, s.Sector, c.Cell, v.Village, t.Citizen_Category, t.HouseNo, t.Status, t.RegDate 
+        FROM resident t  INNER JOIN provinces p ON t.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=t.District INNER JOIN sectors s ON s.SectorID=t.Sector INNER JOIN cells c ON c.CellID=t.Cell INNER JOIN villages v ON v.VillageID=t.Village
         WHERE HouseNo IS NOT NULL 
-        AND CONCAT_WS(' ', Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Province, District, Sector, Cell, Village, citizen_category, HouseNo, Status, RegDate) LIKE ? 
+        AND CONCAT_WS(' ', t.Firstname, t.Lastname, t.DoB, t.Telephone, t.Gender, t.ID, t.FatherNames, t.MotherNames, p.Province, d.District, s.Sector, c.Cell, v.Village, t.Citizen_Category, t.HouseNo,t.Status, t.RegDate) LIKE ? 
         ORDER BY Identifier DESC 
         LIMIT ? OFFSET ?";
 

@@ -34,4 +34,41 @@ echo $writer->writeString($qrCode); // Directly output the PNG image
 
 // Display the path to the saved image (optional)
 echo "QR Code saved to: " . $qrCodePath;
+// Use the PHPMailer class
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Include the PHPMailer files (use Composer autoloader or manual inclusion)
+require 'vendor/autoload.php'; // Composer autoloader, or use the path to PHPMailer's files
+
+$mail = new PHPMailer(true);
+
+try {
+    // Set mailer to use SMTP
+    $mail->isSMTP();
+
+    // Set the SMTP server to Gmail's server
+    $mail->Host       = 'smtp.gmail.com';            // Gmail SMTP server
+    $mail->SMTPAuth   = true;                        // Enable SMTP authentication
+    $mail->Username   = 'your-email@gmail.com';      // Your Gmail address
+    $mail->Password   = 'your-email-password';       // Your Gmail password or App Password (if 2FA enabled)
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use STARTTLS encryption
+    $mail->Port       = 587;                         // Gmail SMTP port for STARTTLS
+
+    // Recipients
+    $mail->setFrom('your-email@gmail.com', 'CRMS');  // Your Gmail address (sender)
+    $mail->addAddress($email, 'Recipient Name');      // Add recipient email
+
+    // Email Content
+    $mail->isHTML(true);                             // Set email format to HTML
+    $mail->Subject = 'Password Reset Request';       // Email subject
+    $mail->Body    = 'Click the link below to reset your password:<br><a href="' . $resetLink . '">Reset Password</a>'; // Email body
+
+    // Send the email
+    $mail->send();
+    echo 'Password reset email has been sent to your email address.';
+} catch (Exception $e) {
+    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+}
+
 ?>

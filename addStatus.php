@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <form action="addStatus.php" method="POST">
         <div class="form-group">
             <label for="firstname">Citizen Status:</label>
-            <input type="text" class="form-control" id="message" name="message" required>
+            <input type="text" class="form-control" id="message" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" name="message" required>
         </div>
         <div class="form-group">
             <label for="lastname">Description:</label>

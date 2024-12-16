@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $lastname = $_POST['lastname'];
     $email = $_POST['email'];
     
-    $password = $_POST['password'];
+    $password = md5($_POST['password']);
     $role = $_POST['role'];
     $id = $_POST['id'];
     $telephone = $_POST['telephone'];
@@ -167,19 +167,19 @@ if ($result->num_rows > 0) {
     <form action="updateUser.php?userID=<?php echo $userID; ?>" method="POST">
         <div class="form-group">
             <label for="firstname">Firstname:</label>
-            <input type="text" class="form-control" id="firstname" name="firstname" value="<?php echo htmlspecialchars($user['Firstname']); ?>" required>
+            <input type="text" class="form-control" id="firstname" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" name="firstname" value="<?php echo htmlspecialchars($user['Firstname']); ?>" required>
         </div>
         <div class="form-group">
             <label for="lastname">Lastname:</label>
-            <input type="text" class="form-control" id="lastname" name="lastname" value="<?php echo htmlspecialchars($user['Lastname']); ?>" required>
+            <input type="text" class="form-control" id="lastname" name="lastname" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" value="<?php echo htmlspecialchars($user['Lastname']); ?>" required>
         </div>
         <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['Email']); ?>" required>
         </div>
         <div class="form-group">
-            <label for="password">Password (Leave empty to keep existing password):</label>
-            <input type="password" class="form-control" id="password" name="password">
+            <label for="password">Password:</label>
+            <input type="password" class="form-control" id="password" name="password" required>
         </div>
         <div class="form-group">
             <label for="role">Role:</label>
@@ -283,6 +283,73 @@ if ($result->num_rows > 0) {
 
 <script src="bootstrap/jquery.slim.js"></script>
 <script src="bootstrap/bootstrap.bundle.js"></script>
+<script>
+    window.addEventListener("DOMContentLoaded",function(){
+        loadProvinces();
+        document.querySelector("#province").onchange=function(){
+            loadDistrict(document.querySelector("#province").value);
+        }
+        document.querySelector("#district").onchange=function(){
+            loadSector(document.querySelector("#district").value);
+        }
+        document.querySelector("#sector").onchange=function(){
+            loadCell(document.querySelector("#sector").value);
+        }
+        document.querySelector("#cell").onchange=function(){
+            loadVillage(document.querySelector("#cell").value);
+        }
+    })
+    var reqOptions = {
+        headers:{
+            "Content-Type":"application/json"
+        }
+    }
+    async function loadProvinces(){
+        const data = await fetch("helper/api.php?find=province",reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        console.log(data);
+        setAdministrativeSelect("province",data,"Province");
+    }
+    async function loadDistrict(id){
+        const data = await fetch("helper/api.php?find=district&province="+id,reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        setAdministrativeSelect("district",data,"District");
+    }
+    async function loadSector(id){
+        const data = await fetch("helper/api.php?find=sector&district="+id,reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        setAdministrativeSelect("sector",data,"Sector");
+    }
+    async function loadCell(id){
+        const data = await fetch("helper/api.php?find=cell&sector="+id,reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        setAdministrativeSelect("cell",data,"Cell");
+    }
+    async function loadVillage(id){
+        const data = await fetch("helper/api.php?find=village&cell="+id,reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        setAdministrativeSelect("village",data,"Village");
+    }
+    function setAdministrativeSelect(el,arr,keyElement){
+        let options = "<option value='0'>Select </option>";
+        for(let i=0;i<arr.length;i++){
+            let keyElementId = keyElement+"ID";
+            options+=`<option value=${arr[i][keyElementId]}>${arr[i][keyElement]}</option>`;
+        }
+        console.log(arr);
+        document.getElementById(el).innerHTML = options;
+    }
+ </script>
 </body>
 </html>
 

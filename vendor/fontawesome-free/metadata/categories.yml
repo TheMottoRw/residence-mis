@@ -746,7 +746,7 @@ editors:
     - spell-check
     - strikethrough
     - subscript
-    - superscript
+    - rootscript
     - sync
     - sync-alt
     - table
@@ -1549,7 +1549,7 @@ mathematics:
     - plus
     - square-root-alt
     - subscript
-    - superscript
+    - rootscript
     - times
     - wave-square
   label: Mathematics

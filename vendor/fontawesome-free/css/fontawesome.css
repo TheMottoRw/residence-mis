@@ -3831,10 +3831,10 @@ readers do not read off random characters that represent icons */
 .fa-sun:before {
   content: "\f185"; }
 
-.fa-superpowers:before {
+.fa-rootpowers:before {
   content: "\f2dd"; }
 
-.fa-superscript:before {
+.fa-rootscript:before {
   content: "\f12b"; }
 
 .fa-supple:before {

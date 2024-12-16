@@ -1,3 +1,8 @@
+<?php
+include 'connect.php';
+include_once "includes/session_manager.php";
+session_start();
+session_controller();
 <?php include 'connect.php';
 ?>
 <!DOCTYPE html>
