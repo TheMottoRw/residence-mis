@@ -1,7 +1,7 @@
 <?php 
 // include database connection file
 
-$con=mysqli_connect("localhost","super","","crms");
+$con=mysqli_connect("localhost","root","","crms");
 if (mysqli_connect_errno()) {
 	?>
 	<script>

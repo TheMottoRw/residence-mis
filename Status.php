@@ -108,7 +108,7 @@
                     <th>" . htmlspecialchars($row["StatusID"]) . "</th>
                     <td>" . htmlspecialchars($row["Message"]) . "</td>
                     <td>" . htmlspecialchars($row["Description"]) . "</td>
-                    <td><a href='updateStatus.php?statusid=" . htmlspecialchars($row["StatusID"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a></td>
+                    <td><a href='updateCitizenStatus.php?statusid=" . htmlspecialchars($row["StatusID"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a></td>
                   </tr>";
         }
         

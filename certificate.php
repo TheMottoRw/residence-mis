@@ -1,7 +1,5 @@
 <?php include 'header.php'; ?> 
 <?php  
-session_start(); // Ensure that the session is started
-
 include 'connect.php'; // Include database connection
 $resident = null;
 $authorizer_firstname = "";

@@ -7,6 +7,9 @@
     <title>All_Citizens</title>
     <link rel="stylesheet" href="bootstrap/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.26/jspdf.plugin.autotable.min.js"></script> <!-- Add autoTable plugin -->
+
 </head>
 <body>
 <?php include 'header.php'; ?>
@@ -33,12 +36,18 @@ $offset = ($page - 1) * $records_per_page;
 $search_query = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 
 // Prepare the SQL query to include the search condition and order by Identifier descending
-$sql = "SELECT Identifier, Firstname, Lastname, DoB, Telephone, Gender, ID, Province,District, Sector, Cell, Village, citizen_category, HouseNo, Status 
+/*$sql = "SELECT Identifier, Firstname, Lastname, DoB, Telephone, Gender, ID, Province,District, Sector, Cell, Village, citizen_category, HouseNo, Status 
         FROM resident 
-        WHERE citizen_category IN ('Landlord', 'Landlady') 
+        WHERE citizen_category IN ('Landlord') 
         AND CONCAT_WS(' ', Firstname, Lastname, DoB, Telephone, Gender, ID,Province, District, Sector, Cell, Village, citizen_category, HouseNo, Status) LIKE ? 
         ORDER BY Identifier DESC
-        LIMIT ? OFFSET ?";
+        LIMIT ? OFFSET ?";*/
+$sql = "SELECT t.Identifier, t.Firstname, t.Lastname, t.DoB, t.Telephone, t.Gender, t.ID, t.FatherNames, t.MotherNames, p.Province, d.District, s.Sector, c.Cell, v.Village, t.Citizen_Category, t.HouseNo, t.Status, t.RegDate 
+FROM resident t  INNER JOIN provinces p ON t.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=t.District INNER JOIN sectors s ON s.SectorID=t.Sector INNER JOIN cells c ON c.CellID=t.Cell INNER JOIN villages v ON v.VillageID=t.Village
+WHERE citizen_category IN ('Landlord') 
+AND CONCAT_WS(' ', t.Firstname, t.Lastname, t.DoB, t.Telephone, t.Gender, t.ID, t.FatherNames, t.MotherNames, p.Province, d.District, s.Sector, c.Cell, v.Village, t.Citizen_Category, t.HouseNo,t.Status, t.RegDate) LIKE ? 
+ORDER BY RegDate DESC 
+LIMIT ? OFFSET ?";
 
 // Prepare and execute the statement
 $stmt = $conn->prepare($sql);
@@ -88,12 +97,14 @@ if ($result->num_rows > 0) {
                     <div style='flex: 1; text-align: center; font-size: 24px;'>
                         <h2 class='text-center'>List Of All Landlords and Landladies</h2>
                     </div>
+                    <div style='margin-right: 10px;'>
+                        <button class='btn btn-primary' id='generateReportButton'><b>DownloadReport</b></button>
+                    </div>
                 </div>
             </th>
           </tr>";
     // Column headers
     echo "<tr>
-            <th scope='col'>ResidentNo</th>
             <th scope='col'>Firstname</th>
             <th scope='col'>Lastname</th>
             <th scope='col'>DoB</th>
@@ -105,8 +116,6 @@ if ($result->num_rows > 0) {
             <th scope='col'>Sector</th>
             <th scope='col'>Cell</th>
             <th scope='col'>Village</th>
-            <th scope='col'>HouseNo</th>
-            <th scope='col'>Status</th>
             <th scope='col'>Action</th>
           </tr>";
     echo "</thead>";
@@ -117,7 +126,6 @@ if ($result->num_rows > 0) {
     // Output data for each row
     while ($row = $result->fetch_assoc()) {
         echo "<tr>
-                <th>" . htmlspecialchars($row["Identifier"]) . "</th>
                 <td>" . htmlspecialchars($row["Firstname"]) . "</td>
                 <td>" . htmlspecialchars($row["Lastname"]) . "</td>
                 <td>" . htmlspecialchars($row["DoB"]) . "</td>
@@ -129,9 +137,6 @@ if ($result->num_rows > 0) {
                 <td>" . htmlspecialchars($row["Sector"]) . "</td>
                 <td>" . htmlspecialchars($row["Cell"]) . "</td>
                 <td>" . htmlspecialchars($row["Village"]) . "</td>
-                
-                <td>" . htmlspecialchars($row["HouseNo"]) . "</td>
-                <td style='color: red;'>" . htmlspecialchars($row["Status"]) . "</td>
                 <td><a href='updateResident.php?identifier=" . htmlspecialchars($row["Identifier"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a></td>
               </tr>";
     }
@@ -198,12 +203,14 @@ if ($result->num_rows > 0) {
                     <div style='flex: 1; text-align: center; font-size: 24px;'>
                         <h2 class='text-center'>List Of All Landlords and Landladies</h2>
                     </div>
+                    <div style='margin-right: 10px;'>
+                        <button class='btn btn-primary' id='generateReportButton'><b>DownloadReport</b></button>
+                    </div>
                 </div>
             </th>
           </tr>";
     // Column headers
     echo "<tr>
-            <th scope='col'>ResidentNo</th>
             <th scope='col'>Firstname</th>
             <th scope='col'>Lastname</th>
             <th scope='col'>DoB</th>
@@ -215,9 +222,6 @@ if ($result->num_rows > 0) {
             <th scope='col'>Sector</th>
             <th scope='col'>Cell</th>
             <th scope='col'>Village</th>
-            <th scope='col'>HouseNo</th>
-            <th scope='col'>Status</th>
-            <th scope='col'>Action</th>
           </tr>";
     echo "</thead>";
     echo "<tbody>";
@@ -253,6 +257,42 @@ if ($result->num_rows > 0) {
 // Close connection
 $conn->close();
 ?>
+<script>
+    document.getElementById('generateReportButton').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');  // Landscape mode
+
+        // Set title
+        doc.setFontSize(18);
+        doc.text('House Owner Report', 210, 10, null, null, 'center');
+        doc.setFontSize(8);
+        doc.text('Generated on: ' + new Date().toLocaleString(), 210, 20, null, null, 'center');
+
+        // Define table headers
+        const headers = ['FirstName', 'LastName', 'DoB', 'Telephone', 'Gender', 'ID','Province', 'District', 'Sector', 'Cell', 'Village'];
+        // Collect table data
+        let tableData = [];
+        document.querySelectorAll('table tbody tr').forEach(row => {
+            let rowData = [];
+            row.querySelectorAll('td').forEach(cell => {
+                rowData.push(cell.textContent.trim());
+            });
+            tableData.push(rowData);
+        });
+
+        // Use autoTable to add data to PDF
+        doc.autoTable({
+            head: [headers],
+            body: tableData,
+            startY: 30,  // Start position of the table
+            theme: 'striped',  // Optional styling
+            margin: { top: 10, left: 10, right: 10, bottom: 10 }
+        });
+
+        // Save the PDF
+        doc.save('Landlord_report.pdf');
+    });
+</script>
 <script src="bootstrap/jquery.slim.js"></script>
 <script src="bootstrap/bootstrap.bundle.js"></script>
 </body>

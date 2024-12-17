@@ -74,7 +74,7 @@
                 <th colspan='16' style='text-align: left; background-color: #f8f9fa;'>
                     <div style='display: flex; align-items: center;'>
                         <div style='margin-right: 10px;'>
-                            <a class='small' href='addRole.php'>
+                            <a class='small' href='addUserrole.php'>
                                 <button class='btn btn-primary'><b>Add New+</b></button>
                             </a>
                         </div>
@@ -92,9 +92,9 @@
               </tr>";
         // Column headers
         echo "<tr>
-                <th scope='col'>RoleID</th>
-                <th scope='col'>RoleName</th>
-                <th scope='col'>Action</th>
+                <th align='Center' scope='col'>RoleID</th>
+                <th align='Center' scope='col'>RoleName</th>
+                <th align='Center' scope='col'>Action</th>
               </tr>";
         echo "</thead>";
         
@@ -104,9 +104,10 @@
         // Output data for each row
         while ($row = $result->fetch_assoc()) {
             echo "<tr>
-                    <th>" . htmlspecialchars($row["RoleID"]) . "</th>
-                    <td>" . htmlspecialchars($row["RoleName"]) . "</td>
-                    <td><a href='updateRole.php?roleid=" . htmlspecialchars($row["RoleID"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a></td>
+                    <th align='Center'>" . htmlspecialchars($row["RoleID"]) . "</th>
+                    <td align='Center'>" . htmlspecialchars($row["RoleName"]) . "</td>
+                    <td align='Center'><a href='updateUserRole.php?roleid=" . htmlspecialchars($row["RoleID"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a>
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<a href='deleteRole.php?roleid=" . htmlspecialchars($row["RoleID"]) . "' style='color: red;'>Delete</a></td>
                   </tr>";
         }
         

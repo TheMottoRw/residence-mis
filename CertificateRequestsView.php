@@ -31,15 +31,15 @@ function filterQueryBuilder()
 {
     global $conn;
     if ($_SESSION['role'] == 'Landlord') {
-        $sql = "SELECT cr.*,r.Firstname,r.Lastname,concat(howner.Firstname,' ',howner.Lastname) as Landlord,h.HouseNo FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID AND r.ID!=howner.ID
+        $sql = "SELECT cr.*,r.Firstname,r.Lastname,concat(howner.Firstname,' ',howner.Lastname) as Landlord,h.HouseNo,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
 WHERE CONCAT_WS(cr.RequestNo, cr.ResidentNo, cr.ID) LIKE ? AND h.ID='" . $_SESSION['ID'] . "'
  ORDER BY cr.RequestNo DESC LIMIT ? OFFSET ?";
 
-    } else if ($_SESSION['role'] == 'Village leader') {
+    } else if ($_SESSION['role'] == 'Village_Leader') {
         $sql = "SELECT cr.*,r.Firstname,r.Lastname,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
 WHERE CONCAT_WS(cr.RequestNo, cr.ResidentNo, cr.ID) LIKE ? AND h.Cell='" . $_SESSION['cell'] . "' AND h.Village='" . $_SESSION['village'] . "'
  ORDER BY cr.RequestNo DESC LIMIT ? OFFSET ?";
-    } else if ($_SESSION['role'] == 'Cell leader') {
+    } else if ($_SESSION['role'] == 'Cell_Leader') {
         $sql = "SELECT cr.*,r.Firstname,r.Lastname,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
 WHERE CONCAT_WS(cr.RequestNo, cr.ResidentNo, cr.ID) LIKE ? AND h.Cell='" . $_SESSION['cell'] . "'
  ORDER BY cr.RequestNo DESC LIMIT ? OFFSET ?";
@@ -54,9 +54,9 @@ function approveCertificateRequest($requestNo)
     $date = date("Y-m-d H:i");
     if ($_SESSION['role'] == 'Landlord') {
         $sql = "UPDATE certificate_requests SET HouseOwnerApproval='1',HouseOwnerApprovedAt='".$date."' WHERE RequestNo=?";
-    } else if ($_SESSION['role'] == 'Village leader') {
+    } else if ($_SESSION['role'] == 'Village_Leader') {
         $sql = "UPDATE certificate_requests SET VillageLeaderApproval='1',VillageLeaderApprovedAt='".$date."' WHERE RequestNo=?";
-    } else if ($_SESSION['role'] == 'Cell leader') {
+    } else if ($_SESSION['role'] == 'Cell_Leader') {
         $sql = "UPDATE certificate_requests SET CellLeaderApproval='1',CellLeaderApprovedAt='".$date."' WHERE RequestNo=?";
     }
     $st = $conn->prepare($sql);

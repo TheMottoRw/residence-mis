@@ -25,11 +25,11 @@ if (!isset($_GET['identifier'])) {
     die("ID not specified.");
 }
 
-$id = $_GET['identifier'];
+$identifier = $_GET['identifier'];
 
 // Fetch the record from the database
-$stmt = $conn->prepare("SELECT * FROM resident WHERE Identifier = ?");
-$stmt->bind_param("i", $id);
+$stmt = $conn->prepare("SELECT t.*,p.Province as ProvinceName,d.District as DistrictName,s.Sector as SectorName,c.Cell as CellName,v.Village as VillageName FROM resident t  INNER JOIN provinces p ON t.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=t.District INNER JOIN sectors s ON s.SectorID=t.Sector INNER JOIN cells c ON c.CellID=t.Cell INNER JOIN villages v ON v.VillageID=t.Village WHERE Identifier = ?");
+$stmt->bind_param("i", $identifier);
 $stmt->execute();
 $result = $stmt->get_result();
 $record = $result->fetch_assoc();
@@ -58,6 +58,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $houseno = $_POST['houseno'];
     $status = $_POST['status'];
 
+    $sql = "SELECT * FROM  houses t WHERE HouseNo = ?";
+    $stmt = $conn->prepare($sql);
+    
+    // Check if prepare() failed
+    if ($stmt === false) {
+        die('MySQL prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $houseno);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = $result->fetch_assoc();
+    if($result->num_rows==0)
+{
+    echo "<script>alert('House not found');window.location=window.location.href;</script>";
+    exit();
+}
     // Prepare and execute update statement
     $stmt = $conn->prepare("UPDATE resident SET 
     Firstname = ?, 
@@ -143,11 +160,11 @@ if ($result->num_rows > 0) {
     <form action="updateResident.php?identifier=<?php echo htmlspecialchars($record['Identifier']); ?>" method="POST">
         <div class="form-group">
             <label for="firstname">Firstname:</label>
-            <input type="text" class="form-control" id="firstname" name="firstname" value="<?php echo htmlspecialchars($record['Firstname']); ?>" readonly required>
+            <input type="text" class="form-control" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" id="firstname" name="firstname" value="<?php echo htmlspecialchars($record['Firstname']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="lastname">Lastname:</label>
-            <input type="text" class="form-control" id="lastname" name="lastname" value="<?php echo htmlspecialchars($record['Lastname']); ?>" readonly required>
+            <input type="text" class="form-control" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed!" id="lastname" name="lastname" value="<?php echo htmlspecialchars($record['Lastname']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="dob">Date of Birth:</label>
@@ -155,7 +172,7 @@ if ($result->num_rows > 0) {
         </div>
         <div class="form-group">
             <label for="telephone">Telephone:</label>
-            <input type="text" class="form-control" id="telephone" name="telephone" value="<?php echo htmlspecialchars($record['Telephone']); ?>" readonly required>
+            <input type="text" class="form-control" id="telephone" pattern="[0-9]*" inputmode="numeric" title="Only numbers are aloowed!" name="telephone" value="<?php echo htmlspecialchars($record['Telephone']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="id">Gender:</label>
@@ -163,39 +180,44 @@ if ($result->num_rows > 0) {
         </div>
         <div class="form-group">
             <label for="id">ID:</label>
-            <input type="text" class="form-control" id="id" name="id" value="<?php echo htmlspecialchars($record['ID']); ?>" readonly required>
+            <input type="text" class="form-control" id="id" pattern="[0-9]*" inputmode="numeric" title="Only numbers are aloowed!" name="id" value="<?php echo htmlspecialchars($record['ID']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="district">MotherNames:</label>
-            <input type="text" class="form-control" id="mothernames" name="mothernames" value="<?php echo htmlspecialchars($record['MotherNames']); ?>" readonly required>
+            <input type="text" class="form-control" id="mothernames" name="mothernames" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed!" value="<?php echo htmlspecialchars($record['MotherNames']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="district">FatherNames:</label>
-            <input type="text" class="form-control" id="fathernames" name="fathernames" value="<?php echo htmlspecialchars($record['FatherNames']); ?>" readonly required>
+            <input type="text" class="form-control" id="fathernames" name="fathernames" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed!" value="<?php echo htmlspecialchars($record['FatherNames']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="houseno">House No:</label>
-            <input type="text" class="form-control" id="houseno" name="houseno" value="<?php echo htmlspecialchars($record['HouseNo']); ?>" required>
+            <input type="text" class="form-control" id="houseno" name="houseno" value="<?php echo htmlspecialchars($record['HouseNo']); ?>">
         </div>
         <div class="form-group">
             <label for="district">Province:</label>
-            <input type="text" class="form-control" id="province" name="province" value="<?php echo htmlspecialchars($record['Province']); ?>"readonly required>
+            <input type="hidden" id="province" name="province" value="<?php echo htmlspecialchars($record['Province']); ?>">
+            <input type="text" class="form-control" id="provinceName" name="provinceName" value="<?php echo htmlspecialchars($record['ProvinceName']); ?>"readonly required>
         </div>
         <div class="form-group">
             <label for="district">District:</label>
-            <input type="text" class="form-control" id="district" name="district" value="<?php echo htmlspecialchars($record['District']); ?>" readonly required>
+            <input type="hidden" id="district" name="district" value="<?php echo htmlspecialchars($record['District']); ?>">
+            <input type="text" class="form-control" id="districtName" name="districtName" value="<?php echo htmlspecialchars($record['DistrictName']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="sector">Sector:</label>
-            <input type="text" class="form-control" id="sector" name="sector" value="<?php echo htmlspecialchars($record['Sector']); ?>" readonly required>
+            <input type="hidden" id="sector" name="sector" value="<?php echo htmlspecialchars($record['Sector']); ?>">
+            <input type="text" class="form-control" id="sectorName" name="sectorName" value="<?php echo htmlspecialchars($record['SectorName']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="cell">Cell:</label>
-            <input type="text" class="form-control" id="cell" name="cell" value="<?php echo htmlspecialchars($record['Cell']); ?>" readonly required>
+            <input type="hidden" id="cell" name="cell" value="<?php echo htmlspecialchars($record['Cell']); ?>">
+            <input type="text" class="form-control" id="cellName" name="cellName" value="<?php echo htmlspecialchars($record['CellName']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="village">Village:</label>
-            <input type="text" class="form-control" id="village" name="village" value="<?php echo htmlspecialchars($record['Village']); ?>" readonly required>
+            <input type="hidden" id="village" name="village" value="<?php echo htmlspecialchars($record['Village']); ?>">
+            <input type="text" class="form-control" id="villageName" name="villageName" value="<?php echo htmlspecialchars($record['VillageName']); ?>" readonly required>
         </div>
         <div class="form-group">
             <label for="gender">Citizen_Category:</label>
@@ -225,5 +247,36 @@ if ($result->num_rows > 0) {
 </div>
 <script src="bootstrap/jquery.slim.js"></script>
 <script src="bootstrap/bootstrap.bundle.js"></script>
+<script>
+    window.addEventListener("DOMContentLoaded",function(){
+        document.querySelector("#houseno").addEventListener("blur",function(){
+            loadByHouse(document.querySelector("#houseno").value);
+        })
+    })
+    async function loadByHouse(houseNo){
+        const house = await fetch("helper/api.php?find=byHouseNo&house_no="+houseNo,{
+            headers:{
+                "Content-Type":"application/json"
+            }
+        })
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        if(house!=null){
+            let obj = house;
+            document.querySelector("#province").value = obj.Province;
+            document.querySelector("#provinceName").value = obj.ProvinceName;
+            document.querySelector("#districtName").value = obj.DistrictName;
+            document.querySelector("#district").value = obj.District;
+            document.querySelector("#sector").value = obj.Sector;
+            document.querySelector("#sectorName").value = obj.SectorName;
+            document.querySelector("#cell").value = obj.Cell;
+            document.querySelector("#cellName").value = obj.CellName;
+            document.querySelector("#village").value = obj.Village;
+            document.querySelector("#villageName").value = obj.VillageName;
+
+        }else{alert("House not found");}
+    }
+</script>
 </body>
 </html>

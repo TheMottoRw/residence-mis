@@ -7,9 +7,9 @@ session_controller();
 <div class="row" style="background:skyblue; height:50px; width:2000px; text-align: center; .header h3:hover {
             color: #ffdd57;">
     <div class="pageheader" style="text-align:center;">
-        <h3>&nbsp &nbsp &nbsp &nbsp&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp 
-        &nbsp &nbsp &nbsp &nbsp&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp 
-        Citizen's Residence Management System (CRMS)</h3>
+        <h3>&nbsp &nbsp &nbsp &nbsp&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+            &nbsp &nbsp &nbsp &nbsp&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+            Citizen's Residence Management System (CRMS)</h3>
     </div>
 </div>
 <!-- End Header -->
@@ -19,12 +19,14 @@ session_controller();
     <!--<a class="navbar-brand" href="#">
         <img src="images/logo.jpg" width="20" height="20" alt="CRMS Logo">
     </a>-->
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <?php
-        if($_SESSION['role']=='Admin'){?>
+        if ($_SESSION['role'] == 'Admin') {
+            ?>
             <ul class="navbar-nav mr-auto">
                 <!-- <li class="nav-item active">
                     <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
@@ -37,7 +39,8 @@ session_controller();
                     <a class="nav-link" href="Dashboard.php">Dashboard</a>
                 </li>
                 <li class="nav-item dropdown active">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
+                       aria-expanded="false">
                         <b>Registration</b>
                     </a>
                     <div class="dropdown-menu">
@@ -55,13 +58,15 @@ session_controller();
                     <a class="nav-link enabled" href="certificate.php">Certificate</a>
                 </li>
                 <li class="nav-item dropdown active">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
+                       aria-expanded="false">
                         <b>Reports</b>
                     </a>
                     <div class="dropdown-menu">
                         <a class="dropdown-item" href="ListOfCitizens.php">Citizens</a>
                         <a class="dropdown-item" href="Resident.php">Residents</a>
                         <a class="dropdown-item" href="Status.php">Resident_Status</a>
+                        <a class="dropdown-item" href="CitizenNoHouses.php">Non Tenants</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="houses.php">House</a>
                         <a class="dropdown-item" href="Landlord.php">Landlord/Landlady</a>
@@ -71,29 +76,77 @@ session_controller();
                     </div>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="login.php">Logout</a>
+                    <a class="nav-link" href="Logout.php">Logout</a>
                 </li>
             </ul>
 
             <?php
-        }else{?>
+        } else if ($_SESSION['role'] == 'Landlord') { ?>
 
-        <ul class="navbar-nav mr-auto">
-            <!-- <li class="nav-item active">
-                <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
-            </li>-->
-            <li>
-                <img src="images/logo.jpg" width="50" height="50" alt="CRMS Logo">
-            </li>
+            <ul class="navbar-nav mr-auto">
+                <!-- <li class="nav-item active">
+                    <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
+                </li>-->
+                <li>
+                    <img src="images/logo.jpg" width="50" height="50" alt="CRMS Logo">
+                </li>
 
-            <li class="nav-item active">
-                <a class="nav-link" href="CertificateRequestsView.php">Certificate Requests</a>
-            </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="CertificateRequestsView.php">Certificate Requests</a>
+                </li>
 
-            <li class="nav-item active">
-                <a class="nav-link" href="login.php">Logout</a>
-            </li>
-        </ul>
+                <li class="nav-item active">
+                    <a class="nav-link" href="myHouses.php">My House</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="tenants.php">Tenants</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="dropdown-item" href="CitizenNoHouses.php">Non Tenants</a>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="Logout.php">Logout</a>
+                </li>
+            </ul>
+            <?php
+        } else if ($_SESSION['role'] == 'Prison') { ?>
+
+            <ul class="navbar-nav mr-auto">
+                <!-- <li class="nav-item active">
+                    <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
+                </li>-->
+                <li>
+                    <img src="images/logo.jpg" width="50" height="50" alt="CRMS Logo">
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="jailed.php">Jailed people</a>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="Logout.php">Logout</a>
+                </li>
+            </ul>
+            <?php
+        } else if ($_SESSION['role'] == 'Migration') { ?>
+
+            <ul class="navbar-nav mr-auto">
+                <!-- <li class="nav-item active">
+                    <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
+                </li>-->
+                <li>
+                    <img src="images/logo.jpg" width="50" height="50" alt="CRMS Logo">
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="citizenAbroad.php">Citizen abroad</a>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="Logout.php">Logout</a>
+                </li>
+            </ul>
             <?php
         }
         ?>
@@ -107,7 +160,7 @@ session_controller();
 // Check if the user is logged in, if not, redirect to login page
 //if (!isset($_SESSION['userID'])) 
 //{
-   // header("Location: login.php"); // Redirect to the login page
-    //exit();
+// header("Location: login.php"); // Redirect to the login page
+//exit();
 //}
 ?>

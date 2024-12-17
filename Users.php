@@ -33,10 +33,10 @@ $offset = ($page - 1) * $records_per_page;
 $search_query = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 
 // Prepare the SQL query to include the search condition and order by UserID descending
-$sql = "SELECT UserID, Firstname, Lastname, Email, ID, Role, Telephone, ID, Province, District, Sector, Cell, Village, Status
-        FROM users 
-        WHERE CONCAT_WS(' ',  Firstname, Lastname, Email, ID, Role, Telephone, ID, Province, District, Sector, Cell, Village, Status) LIKE ? 
-        ORDER BY UserID DESC
+$sql = "SELECT u.UserID, u.Firstname, u.Lastname, u.Email, u.ID, u.Role, u.Telephone, u.ID, p.Province, d.District, s.Sector, c.Cell, v.Village, u.Status
+        FROM users u  INNER JOIN provinces p ON u.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=u.District INNER JOIN sectors s ON s.SectorID=u.Sector INNER JOIN cells c ON c.CellID=u.Cell INNER JOIN villages v ON v.VillageID=u.Village
+        WHERE CONCAT_WS(' ',  u.Firstname, u.Lastname, u.Email, u.ID, u.Role, u.Telephone, u.ID, p.Province, d.District, s.Sector, c.Cell, v.Village, u.Status) LIKE ? 
+        ORDER BY u.UserID DESC
         LIMIT ? OFFSET ?";
 
 // Prepare and execute the statement
@@ -127,7 +127,8 @@ if ($result->num_rows > 0) {
                 <td>" . htmlspecialchars($row["Cell"]) . "</td>
                 <td>" . htmlspecialchars($row["Village"]) . "</td>
                 <td style='color: red;'>" . $status . "</td>
-                <td><a href='updateUser.php?userID=" . htmlspecialchars($row["UserID"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a></td>
+                <td><a href='updateUser.php?userID=" . htmlspecialchars($row["UserID"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a>
+                <br><a href='deleteUser.php?userID=" . htmlspecialchars($row["UserID"]) . "' style='color: red;'>Delete</a></td>
               </tr>";
     }
 

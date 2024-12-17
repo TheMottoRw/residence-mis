@@ -2667,7 +2667,7 @@ function matcherFromTokens( tokens ) {
 function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 	var bySet = setMatchers.length > 0,
 		byElement = elementMatchers.length > 0,
-		superMatcher = function( seed, context, xml, results, outermost ) {
+		rootMatcher = function( seed, context, xml, results, outermost ) {
 			var elem, j, matcher,
 				matchedCount = 0,
 				i = "0",
@@ -2785,8 +2785,8 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		};
 
 	return bySet ?
-		markFunction( superMatcher ) :
-		superMatcher;
+		markFunction( rootMatcher ) :
+		rootMatcher;
 }
 
 compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
@@ -5418,7 +5418,7 @@ jQuery.event = {
 				!event.isImmediatePropagationStopped() ) {
 
 				// If the event is namespaced, then each handler is only invoked if it is
-				// specially universal or its namespaces are a superset of the event's.
+				// specially universal or its namespaces are a rootset of the event's.
 				if ( !event.rnamespace || handleObj.namespace === false ||
 					event.rnamespace.test( handleObj.namespace ) ) {
 

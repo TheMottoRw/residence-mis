@@ -1,13 +1,52 @@
-
 <?php include 'connect.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All_Citizens</title>
+    <title>Houses</title>
     <link rel="stylesheet" href="bootstrap/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="jsPDF/jspdf.plugin.autotable.min.js">
+    <link rel="stylesheet" href="jsPDF/jspdf.umd.min.js">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.26/jspdf.plugin.autotable.min.js"></script> <!-- Add autoTable plugin -->
+    <style>
+        /* Compact table style */
+        table {
+            table-layout: auto;
+            width: 100%;
+            font-size: 12px; /* Reduce the font size */
+        }
+        th, td {
+            padding: 5px 8px; /* Decrease padding */
+            word-wrap: break-word;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+        td {
+            background-color: #ffffff;
+        }
+        .pagination a, .pagination span {
+            font-size: 12px; /* Reduce pagination font size */
+            padding: 6px 12px;
+        }
+        .pagination {
+            margin-top: 15px;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .pagination a {
+            text-decoration: none;
+        }
+        .pagination .current {
+            font-weight: bold;
+        }
+    </style>
     
 </head>
 <body>
@@ -24,7 +63,7 @@
     }
 
     // Number of records to display per page
-    $records_per_page = 5;
+    $records_per_page = 7;
 
     // Get the current page number from query string, default is 1
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -37,10 +76,11 @@
 
     // Prepare the SQL query to include the search condition and order by HouseNo descending
     // Prepare the SQL query with the placeholders
-$sql = "SELECT HouseNo, Province, District, Sector, Cell, Village,ID
-FROM houses 
-WHERE CONCAT_WS( HouseNo, Province, District, Sector, Cell, Village,ID) LIKE ? 
-ORDER BY HouseNo DESC
+$sql = "SELECT h.HouseNo, p.Province, d.District, s.Sector, c.Cell, v.Village,h.ID
+FROM houses h INNER JOIN provinces p ON h.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=h.District INNER JOIN sectors s ON s.SectorID=h.Sector 
+              INNER JOIN cells c ON c.CellID=h.Cell INNER JOIN villages v ON v.VillageID=h.Village
+WHERE CONCAT_WS( h.HouseNo, p.Province, d.District, s.Sector, c.Cell, v.Village,h.ID) LIKE ? 
+ORDER BY h.HouseNo DESC
 LIMIT ? OFFSET ?";
 
 // Prepare the statement
@@ -101,6 +141,9 @@ $result = $stmt->get_result();
                         <div style='flex: 1; text-align: center; font-size: 24px;'>
                             <h2 class='text-center'>List Of All Houses</h2>
                         </div>
+                        <div style='margin-right: 10px;'>
+                            <button class='btn btn-primary' id='generateReportButton'><b>DownloadReport</b></button>
+                     </div>
                     </div>
                 </th>
               </tr>";
@@ -124,7 +167,7 @@ $result = $stmt->get_result();
         // Output data for each row
         while ($row = $result->fetch_assoc()) {
             echo "<tr>
-                    <th>" . htmlspecialchars($row["HouseNo"]) . "</th>
+                    <td>" . htmlspecialchars($row["HouseNo"]) . "</td>
                     <td>" . htmlspecialchars($row["Province"]) . "</td>
                     <td>" . htmlspecialchars($row["District"]) . "</td>
                     <td>" . htmlspecialchars($row["Sector"]) . "</td>
@@ -132,7 +175,8 @@ $result = $stmt->get_result();
                     <td>" . htmlspecialchars($row["Village"]) . "</td>
                     <td>" . htmlspecialchars($row["ID"]) . "</td>
                     <td><a href='LandlordInfo.php?id=" . htmlspecialchars($row["ID"]) . "' style='color: red;'>More Info</a></td>
-                    <td><a href='updateHouse.php?houseno=" . htmlspecialchars($row["HouseNo"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a></td>
+                    <td><a href='updateHouse.php?houseno=" . htmlspecialchars($row["HouseNo"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a>
+                    <a href='deleteHouse.php?houseno=" . htmlspecialchars($row["HouseNo"]) . "' style='color: red;'>Delete</a></td>
                   </tr>";
         }
         
@@ -192,7 +236,7 @@ $result = $stmt->get_result();
                 <th colspan='16' style='text-align: left; background-color: #f8f9fa;'>
                     <div style='display: flex; align-items: center;'>
                         <div style='margin-right: 10px;'>
-                            <a class='small' href='addResident.php'>
+                            <a class='small' href='addHouse.php'>
                                 <button class='btn btn-primary'><b>Add New+</b></button>
                             </a>
                         </div>
@@ -280,5 +324,43 @@ $result = $stmt->get_result();
     ?>
     <script src="bootstrap/jquery.slim.js"></script>
     <script src="bootstrap/bootstrap.bundle.js"></script>
+    <script>
+    document.getElementById('generateReportButton').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');  // Landscape mode
+
+        // Set title
+        doc.setFontSize(18);
+        doc.text('Registered House Report', 210, 10, null, null, 'center');
+        doc.setFontSize(10);
+        doc.text('Generated on: ' + new Date().toLocaleString(), 210, 20, null, null, 'center');
+
+        // Define table headers
+        const headers = ['HouseNo', 'Province', 'District', 'Sector', 'Cell', 'Village', 'OwnerID'];
+
+        // Collect table data
+        let tableData = [];
+        document.querySelectorAll('table tbody tr').forEach(row => {
+            let rowData = [];
+            row.querySelectorAll('td').forEach(cell => {
+                rowData.push(cell.textContent.trim());
+            });
+            tableData.push(rowData);
+        });
+
+        // Use autoTable to add data to PDF
+        doc.autoTable({
+            head: [headers], // Set the table headers
+            body: tableData, // Add the table data
+            startY: 30,  // Start position of the table
+            theme: 'striped',  // Optional styling
+            margin: { top: 10, left: 10, right: 10, bottom: 10 }
+        });
+
+        // Save the PDF
+        doc.save('House_Registered_Report.pdf');
+    });
+</script>
+
 </body>
 </html>

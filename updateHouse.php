@@ -85,6 +85,60 @@ if ($result->num_rows > 0) {
         $owneridOptions[] = $row; // Store OwnerID and Message in an array
     }
 }
+// Fetch available Provinces
+$provinceOptions = [];
+$sql = "SELECT Province FROM provinces"; // Query the province table
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $provinceOptions[] = $row; // Store provinces in an array
+    }
+}
+
+// Fetch available districts
+$districtOptions = [];
+$sql = "SELECT District FROM districts"; // Query the districts table
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $districtOptions[] = $row; // Store districts in an array
+    }
+}
+
+// Fetch available sectors
+$sectorOptions = [];
+$sql = "SELECT Sector FROM sectors"; // Query the sectors table
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $sectorOptions[] = $row; // Store sectors in an array
+    }
+}
+
+// Fetch available cells
+$cellOptions = [];
+$sql = "SELECT Cell FROM cells"; // Query the cells table
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $cellOptions[] = $row; // Store cells in an array
+    }
+}
+
+// Fetch available villages
+$villageOptions = [];
+$sql = "SELECT Village FROM villages"; // Query the villages table
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $villageOptions[] = $row; // Store villages in an array
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -108,11 +162,11 @@ if ($result->num_rows > 0) {
 </head>
 <body>
 <div class="container mt-5 form-container">
-<h2 class="text-center">Update Resident's info</h2>
+<h2 class="text-center">Update House's Info</h2>
     <form action="updateHouse.php?houseno=<?php echo htmlspecialchars($record['HouseNo']); ?>" method="POST">
     <div class="form-group">
             <label for="ownerid">House Owner:</label>
-            <select class="form-control" id="ownerid" name="ownerid" required>
+            <select class="form-control" pattern="[0-9]*" inputmode="numeric" title="Only numbers are allowed!" id="ownerid" name="ownerid" required>
             <option value=""><?php echo htmlspecialchars($record['ID']); ?></option>
                 <?php 
                     // Dynamically populate the status dropdown
@@ -124,27 +178,75 @@ if ($result->num_rows > 0) {
         </div>
         <div class="form-group">
             <label for="province">Province:</label>
-            <input type="text" class="form-control" id="province" name="province" value="<?php echo htmlspecialchars($record['Province']); ?>" required>
+            <select class="form-control" id="province" name="province" required>
+                <option value="">Select Province</option>
+                <?php 
+                    // Dynamically populate the province dropdown
+                    foreach ($provinceOptions as $province) {
+                        $selected = ($province['Province'] == $record['Province']) ? 'selected' : '';
+                        echo "<option value='" . $province['Province'] . "' $selected>" . $province['Province'] . "</option>";
+                    }
+                ?>
+            </select>
         </div>
         <div class="form-group">
             <label for="district">District:</label>
-            <input type="text" class="form-control" id="district" name="district" value="<?php echo htmlspecialchars($record['District']); ?>" required>
+            <select class="form-control" id="district" name="district" required>
+                <option value="">Select District</option>
+                <?php 
+                    // Dynamically populate the district dropdown
+                    foreach ($districtOptions as $district) {
+                        $selected = ($district['District'] == $record['District']) ? 'selected' : '';
+                        echo "<option value='" . $district['District'] . "' $selected>" . $district['District'] . "</option>";
+                    }
+                ?>
+            </select>
         </div>
         <div class="form-group">
             <label for="sector">Sector:</label>
-            <input type="text" class="form-control" id="sector" name="sector" value="<?php echo htmlspecialchars($record['Sector']); ?>" required>
+            <select class="form-control" id="sector" name="sector" required>
+                <option value="">Select Sector</option>
+                <?php 
+                    // Dynamically populate the sector dropdown
+                    foreach ($sectorOptions as $sector) {
+                        $selected = ($sector['Sector'] == $record['Sector']) ? 'selected' : '';
+                        echo "<option value='" . $sector['Sector'] . "' $selected>" . $sector['Sector'] . "</option>";
+                    }
+                ?>
+            </select>
         </div>
         <div class="form-group">
             <label for="cell">Cell:</label>
-            <input type="text" class="form-control" id="cell" name="cell" value="<?php echo htmlspecialchars($record['Cell']); ?>" required>
+            <select class="form-control" id="cell" name="cell" required>
+                <option value="">Select Cell</option>
+                <?php 
+                    // Dynamically populate the cell dropdown
+                    foreach ($cellOptions as $cell) {
+                        $selected = ($cell['Cell'] == $record['Cell']) ? 'selected' : '';
+                        echo "<option value='" . $cell['Cell'] . "' $selected>" . $cell['Cell'] . "</option>";
+                    }
+                ?>
+            </select>
         </div>
         <div class="form-group">
             <label for="village">Village:</label>
-            <input type="text" class="form-control" id="village" name="village" value="<?php echo htmlspecialchars($record['Village']); ?>" required>
+            <select class="form-control" id="village" name="village" required>
+                <option value="">Select Village</option>
+                <?php 
+                    // Dynamically populate the village dropdown
+                    foreach ($villageOptions as $village) {
+                        $selected = ($village['Village'] == $record['Village']) ? 'selected' : '';
+                        echo "<option value='" . $village['Village'] . "' $selected>" . $village['Village'] . "</option>";
+                    }
+                ?>
+            </select>
         </div>
         <div class="form-group">
-            <label for="village">Status:</label>
-            <input type="text" class="form-control" id="status" name="status" value="<?php echo htmlspecialchars($record['Status']); ?>" required>
+            <label for="status">Status:</label>
+            <select class="form-control" id="status" name="status" required>
+                <option value="1" <?php echo ($record['Status'] == 1) ? 'selected' : ''; ?>>Available</option>
+                <option value="2" <?php echo ($record['Status'] == 2) ? 'selected' : ''; ?>>Destroyed</option>
+            </select>
         </div>
         <div class="form-group text-center">
             <button type="submit" class="btn btn-custom">Update</button>
@@ -153,5 +255,72 @@ if ($result->num_rows > 0) {
 </div>
 <script src="bootstrap/jquery.slim.js"></script>
 <script src="bootstrap/bootstrap.bundle.js"></script>
+<script>
+    window.addEventListener("DOMContentLoaded",function(){
+        loadProvinces();
+        document.querySelector("#province").onchange=function(){
+            loadDistrict(document.querySelector("#province").value);
+        }
+        document.querySelector("#district").onchange=function(){
+            loadSector(document.querySelector("#district").value);
+        }
+        document.querySelector("#sector").onchange=function(){
+            loadCell(document.querySelector("#sector").value);
+        }
+        document.querySelector("#cell").onchange=function(){
+            loadVillage(document.querySelector("#cell").value);
+        }
+    })
+    var reqOptions = {
+        headers:{
+            "Content-Type":"application/json"
+        }
+    }
+    async function loadProvinces(){
+        const data = await fetch("helper/api.php?find=province",reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        console.log(data);
+        setAdministrativeSelect("province",data,"Province");
+    }
+    async function loadDistrict(id){
+        const data = await fetch("helper/api.php?find=district&province="+id,reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        setAdministrativeSelect("district",data,"District");
+    }
+    async function loadSector(id){
+        const data = await fetch("helper/api.php?find=sector&district="+id,reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        setAdministrativeSelect("sector",data,"Sector");
+    }
+    async function loadCell(id){
+        const data = await fetch("helper/api.php?find=cell&sector="+id,reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        setAdministrativeSelect("cell",data,"Cell");
+    }
+    async function loadVillage(id){
+        const data = await fetch("helper/api.php?find=village&cell="+id,reqOptions)
+        .then(response=>response.json())
+        .then(result=>result)
+        .catch(error=>console.log(error));
+        setAdministrativeSelect("village",data,"Village");
+    }
+    function setAdministrativeSelect(el,arr,keyElement){
+        let options = "<option value='0'>Select </option>";
+        for(let i=0;i<arr.length;i++){
+            let keyElementId = keyElement+"ID";
+            options+=`<option value=${arr[i][keyElementId]}>${arr[i][keyElement]}</option>`;
+        }
+        console.log(arr);
+        document.getElementById(el).innerHTML = options;
+    }
+ </script>
 </body>
 </html>

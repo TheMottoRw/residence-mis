@@ -3,6 +3,8 @@ include 'connect.php';
 include_once "includes/session_manager.php";
 session_start();
 session_controller();
+ini_set('display_errors', 1);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

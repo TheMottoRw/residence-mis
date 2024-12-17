@@ -12359,7 +12359,7 @@ mask:
       - disguise
       - halloween
       - secret
-      - super hero
+      - root hero
   styles:
     - solid
   unicode: f6fa
@@ -18229,24 +18229,24 @@ sun:
     - regular
   unicode: f185
   voted: false
-superpowers:
+rootpowers:
   changes:
     - '4.7'
     - 5.0.0
-  label: Superpowers
+  label: rootpowers
   search:
     terms: []
   styles:
     - brands
   unicode: f2dd
   voted: false
-superscript:
+rootscript:
   changes:
     - '3.1'
     - 5.0.0
     - 5.9.0
     - 5.10.2
-  label: superscript
+  label: rootscript
   search:
     terms:
       - edit

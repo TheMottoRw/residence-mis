@@ -1,4 +1,3 @@
-
 <?php include 'header.php';
 ?>
 <!DOCTYPE html>
@@ -64,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fathernames = $_POST['fathernames'];
     $mothernames = $_POST['mothernames'];
     $password = md5($_POST['password']);
+    $status = $_POST['status'];
 
     // Generate the ResidentNo automatically
     $identifier = generateIdentifier($conn); // Get a unique 8-digit ResidentNo
@@ -73,15 +73,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<div class='alert alert-danger'><center>Resident No. should be exactly 8 digits.</center></div>";
     } else {
         // Prepare and execute insert statement (removed 'Identifier' from the query)
-        $stmt = $conn->prepare("INSERT INTO resident (Identifier,Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Password) 
-                                VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
+        $stmt = $conn->prepare("INSERT INTO resident (Identifier,Firstname, Lastname, DoB, Telephone, Gender, ID, FatherNames, MotherNames, Password,Status) 
+                                VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)");
 
         // Check if the query preparation was successful
         if ($stmt === false) {
             echo "<div class='alert alert-danger'>Error preparing statement: " . $conn->error . "</div>";
         } else {
             // Bind the parameters to the prepared statement
-            $stmt->bind_param("isssssssss",$identifier, $firstname, $lastname, $dob, $telephone, $gender, $id, $fathernames, $mothernames,$password);
+            $stmt->bind_param("issssssssss",$identifier, $firstname, $lastname, $dob, $telephone, $gender, $id, $fathernames, $mothernames,$password,$status);
 
             // Execute the prepared statement
             if ($stmt->execute()) {
@@ -176,19 +176,19 @@ if ($result->num_rows > 0) {
         </div>
         <div class="form-group">
             <label for="firstname">Firstname:</label>
-            <input type="text" class="form-control" id="firstname" name="firstname" required>
+            <input type="text" class="form-control" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" id="firstname" name="firstname" required>
         </div>
         <div class="form-group">
             <label for="lastname">Lastname:</label>
-            <input type="text" class="form-control" id="lastname" name="lastname" required>
+            <input type="text" class="form-control" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" id="lastname" name="lastname" required>
         </div>
         <div class="form-group">
             <label for="lastname">Father_names:</label>
-            <input type="text" class="form-control" id="fathernames" name="fathernames" required>
+            <input type="text" class="form-control" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" id="fathernames" name="fathernames" required>
         </div>
         <div class="form-group">
             <label for="lastname">Mother_names:</label>
-            <input type="text" class="form-control" id="mothernames" name="mothernames" required>
+            <input type="text" class="form-control" pattern="[A-Za-z]*" inputmode="alphabetic" title="Only alphabetic characters are allowed" id="mothernames" name="mothernames" required>
         </div>
         <div class="form-group">
             <label for="dob">Date of Birth:</label>
@@ -196,11 +196,11 @@ if ($result->num_rows > 0) {
         </div>
         <div class="form-group">
             <label for="telephone">Telephone:</label>
-            <input type="text" class="form-control" id="telephone" name="telephone">
+            <input type="text" class="form-control" id="telephone" pattern="[0-9]*" inputmode="numeric" title="Only numbers are allowed!" name="telephone">
         </div>
         <div class="form-group">
             <label for="passsword">Default password:</label>
-            <input type="password" class="form-control" id="password" name="password">
+            <input type="password" class="form-control" id="password" name="password" Required>
         </div>
         <div class="form-group">
             <label for="gender">Gender:</label>
@@ -212,7 +212,11 @@ if ($result->num_rows > 0) {
         </div>
         <div class="form-group">
             <label for="id">ID:</label>
-            <input type="text" class="form-control" id="id" name="id">
+            <input type="text" class="form-control" id="id" name="id" pattern="[0-9]*" inputmode="numeric" title="Only numbers are allowed!">
+        </div>
+        <div class="form-group">
+            <label for="id">Status:</label>
+            <input type="text" class="form-control" id="status" name="status" value="Pending">
         </div>
         <div class="form-group text-center">
             <button type="submit" class="btn btn-custom">Submit</button>
