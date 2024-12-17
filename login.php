@@ -50,35 +50,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['cell'] = $user['Cell'];
         $_SESSION['village'] = $user['Village'];
         $_SESSION['ID'] = $user['ID'];
-
-        if($user['Role']=='Admin'){
-//            header("location:Dashboard.php");
-            echo "<script type='text/javascript'> document.location = 'Dashboard.php'; </script>";
-        }else{
-            echo "<script type='text/javascript'> document.location = 'CertificateRequestsView.php'; </script>";
-        }
-
-        exit();
-    } else {
-        // Prepare and execute query to fetch user data
+    }else {
         $query = "SELECT * FROM resident WHERE Telephone = :email AND password = :password and Citizen_Category='Landlord'";
         $stmt = $pdo->prepare($query);
         $stmt->execute(['email' => $email, 'password' => $password]);
-
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        if($user){
+        if ($user) {
             $_SESSION['email'] = $user['Telephone'];
             $_SESSION['password'] = $user['Password'];
             $_SESSION['role'] = "Landlord";
             $_SESSION['cell'] = $user['Cell'];
             $_SESSION['village'] = $user['Village'];
             $_SESSION['ID'] = $user['ID'];
-            echo "<script type='text/javascript'> document.location = 'CertificateRequestsView.php'; </script>";
         }else{
             echo "<script>alert('Invalid email or password, Your Account is not Active..');</script>";
         }
-        // Invalid login
     }
+
+
+    if(isset($_SESSION['role'])){
+        if ($_SESSION['role'] == 'Admin') {
+//            header("location:Dashboard.php");
+            echo "<script type='text/javascript'> document.location = 'Dashboard.php'; </script>";
+        } else if ($_SESSION['role'] == 'Landlord') {
+            echo "<script type='text/javascript'> document.location = 'CertificateRequestsView.php'; </script>";
+        } else if ($_SESSION['role'] == 'Prison') {
+            echo "<script type='text/javascript'> document.location = 'jailed.php'; </script>";
+        } else if ($_SESSION['role'] == 'Migration') {
+            echo "<script type='text/javascript'> document.location = 'citizenAbroad.php'; </script>";
+        }
+    }
+
 }
 ?>
 
@@ -227,42 +229,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <body>
-    <!-- Header -->
-    <div class="header">
-        <h3>Citizen's Residence Management System (CRMS)</h3>
-    </div>
+<!-- Header -->
+<div class="header">
+    <h3>Citizen's Residence Management System (CRMS)</h3>
+</div>
 
-    <div class="container">
-        <!-- Outer Row -->
-        <div class="row justify-content-center">
-            <div class="col-xl-6 col-lg-8 col-md-8">
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="p-5">
-                                    <div class="text-center mb-4">
-                                        <h1 class="h4 text-gray-900">Login to CRMS</h1>
-                                    </div>
-                                    <form action="#" method="POST">
-                                        <div class="form-group">
-                                            <label for="email">Email/Phone</label>
-                                            <input type="text" class="form-control" id="email" name="email" required>
-                                            <small id="emailHelp" class="form-text text-muted">Never share your credentials with anyone else.</small>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="password">Password</label>
-                                            <input type="password" class="form-control" id="password" name="password" required>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary" name="loginbtn">Login</button>
-                                        <button type="reset" class="btn btn-secondary">Clear</button>
-                                        <div class="text-center mt-3">
-                                            <a class="small" href="Index.php">Homepage</a> || 
-                                            <a class="small" href="forgotPassword.php">Forgot Password?</a>
-                                        </div>
-                                    </form>
+<div class="container">
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+        <div class="col-xl-6 col-lg-8 col-md-8">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <!-- Nested Row within Card Body -->
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="p-5">
+                                <div class="text-center mb-4">
+                                    <h1 class="h4 text-gray-900">Login to CRMS</h1>
                                 </div>
+                                <form action="#" method="POST">
+                                    <div class="form-group">
+                                        <label for="email">Email/Phone</label>
+                                        <input type="text" class="form-control" id="email" name="email" required>
+                                        <small id="emailHelp" class="form-text text-muted">Never share your credentials
+                                            with anyone else.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password">Password</label>
+                                        <input type="password" class="form-control" id="password" name="password"
+                                               required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" name="loginbtn">Login</button>
+                                    <button type="reset" class="btn btn-secondary">Clear</button>
+                                    <div class="text-center mt-3">
+                                        <a class="small" href="Index.php">Homepage</a> ||
+                                        <a class="small" href="forgotPassword.php">Forgot Password?</a>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -270,14 +273,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Footer -->
-    <div class="footer">
-        <p>&copy; 2024 CRMS. All rights reserved.</p>
-    </div>
+<!-- Footer -->
+<div class="footer">
+    <p>&copy; 2024 CRMS. All rights reserved.</p>
+</div>
 
-    <script src="bootstrap/jquery.slim.js"></script>
-    <script src="bootstrap/bootstrap.bundle.js"></script>
+<script src="bootstrap/jquery.slim.js"></script>
+<script src="bootstrap/bootstrap.bundle.js"></script>
 </body>
 
 </html>

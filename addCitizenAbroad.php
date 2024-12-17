@@ -8,7 +8,7 @@ $dbApi = new DbApi();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add new prisoner</title>
+    <title>Add new citizen abroad</title>
     <link rel="stylesheet" href="bootstrap/bootstrap.css">
     <link href="media/select2.min.css" rel="stylesheet"/>
     <style>
@@ -107,9 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $resident = json_decode($resident, true);
 //            clear recent assignment
             //update user with house no
-           $isAdded = $dbApi->addJailed($_POST);
+            $isAdded = $dbApi->addCitizenAbroad($_POST);
             if ($isAdded) {
-                echo "<div class='alert alert-success'><center>Prisonner successful</center>.</div>";
+                echo "<div class='alert alert-success'><center>Citizen abroad recorded successful</center>.</div>";
             } else {
                 echo "<div class='alert alert-danger'>Error: Something went wrong</div>";
             }
@@ -201,8 +201,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
 
 <div class="container mt-5 form-container">
-    <h2 class="text-center">Prisoner registration</h2>
-    <form action="addJailed.php" method="POST" id="form">
+    <h2 class="text-center">Citizen abroad registration</h2>
+    <form action="addCitizenAbroad.php" method="POST" id="form">
         <div class="form-group">
             <label for="id">ID Number:</label>
             <input type="text" class="form-control" id="id" name="id" pattern="[0-9]*" inputmode="numeric"
@@ -258,8 +258,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="text" class="form-control" id="status" name="status" value="Pending" readonly>
         </div>
         <div class="form-group">
-            <label for="id">Reason:</label>
-            <textarea rows="3" class="form-control" id="reason" name="reason"></textarea>
+            <label for="Country">Country:</label>
+            <input type="text" class="form-control" id="Country" name="Country">
+        </div>
+        <div class="form-group">
+            <label for="City">City:</label>
+            <input type="text" class="form-control" id="City" name="City">
+        </div>
+        <div class="form-group">
+            <label for="State">State:</label>
+            <input type="text" class="form-control" id="State" name="State" >
         </div>
         <div class="form-group text-center">
             <button type="submit" class="btn btn-custom">Submit</button>

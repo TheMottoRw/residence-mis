@@ -27,7 +27,7 @@ class DbApi{
 
     // Check if prepare() failed
     if ($stmt === false) {
-        die('MySQL prepare error: ' . $conn->error);
+        die('MySQL prepare error: ' . $this->conn->error);
     }
 
     $stmt->bind_param("s", $houseNo);
@@ -46,7 +46,7 @@ class DbApi{
 }
     function addJailed($arr){
             // Fetch authorizer's details from the user table
-        $stmt0 = $this->conn->prepare("INSERT jailed SET ResidentId=?,reason=?,JailedBy=?");
+        $stmt0 = $this->conn->prepare("INSERT jailed SET ResidentId=?,reason=?,JailedBy=?,status='Inprison'");
         $stmt0->bind_param("isi", $arr['ResidentID'],$arr['reason'],$arr['UserId']);
         $stmt0->execute();
         $stmt = $this->conn->prepare("UPDATE resident SET Status='Jailed' WHERE ID=?");
@@ -65,8 +65,38 @@ class DbApi{
             // Fetch authorizer's details from the user table
         $stmt0 = $this->conn->prepare("UPDATE resident SET Status='Available' WHERE ID=?");
         $stmt0->bind_param("i",$arr['ResidentID']);
-        if($stmt0->execute()) return true;
+        $stmt0->execute();
+        $stmt = $this->conn->prepare("UPDATE jailed SET status='Released' WHERE id=?");
+        $stmt->bind_param("i",$arr['id']);
+        $stmt->execute();
+        header("location: ../jailed.php?message=Successfull released prisoner");
+    }
+    function addCitizenAbroad($arr){
+            // Fetch authorizer's details from the user table
+        $stmt0 = $this->conn->prepare("INSERT citizen_abroad SET ResidentId=?,Country=?,City=?,State=?,AddedBy=?,Status='Abroad'");
+        $stmt0->bind_param("isssi", $arr['ResidentID'],$arr['Country'],$arr['City'],$arr['State'],$arr['UserId']);
+        $stmt0->execute();
+        $stmt = $this->conn->prepare("UPDATE resident SET Status='Abroad' WHERE ID=?");
+        $stmt->bind_param("i", $arr['ResidentID']);
+        if($stmt->execute()) return true;
         return false;
 }
+    function citizenAbroad($arr){
+            // Fetch authorizer's details from the user table
+        $stmt0 = $this->conn->prepare("SELECT cab.*,r.* FROM citizen_abroad cab INNER JOIN resident r ON r.ID=cab.ResidentID WHERE cab.AddedBy=?");
+        $stmt0->bind_param("i", $arr['ID']);
+        $stmt0->execute();
+
+}
+    function removeCitizenAbroad($arr){
+            // Fetch authorizer's details from the user table
+        $stmt0 = $this->conn->prepare("UPDATE resident SET Status='Pending' WHERE ID=?");
+        $stmt0->bind_param("i",$arr['ResidentID']);
+        $stmt0->execute();
+        $stmt = $this->conn->prepare("UPDATE citizen_abroad SET status='Incountry' WHERE id=?");
+        $stmt->bind_param("i",$arr['id']);
+        $stmt->execute();
+        header("location: ../citizenAbroad.php?message=Successfull citizen back home");
+    }
 }
 ?>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>People in jail</title>
+    <title>Citizen abroad</title>
     <link rel="stylesheet" href="bootstrap/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="jsPDF/jspdf.plugin.autotable.min.js">
@@ -87,7 +87,7 @@ if ($_SESSION['role'] == 'Prison')
 
 }
 
-$stmt = $conn->prepare("SELECT j.*,r.* FROM jailed j INNER JOIN resident r ON r.ID=j.ResidentID WHERE j.JailedBy=? AND CONCAT_WS( r.ID, r.Firstname, r.Lastname) LIKE ? ");
+$stmt = $conn->prepare("SELECT cab.*,r.* FROM citizen_abroad cab INNER JOIN resident r ON r.ID=cab.ResidentID WHERE cab.AddedBy=? AND CONCAT_WS( r.ID, r.Firstname, r.Lastname) LIKE ? ");
 
 // Prepare the statement
 //$stmt = $conn->prepare($sql);
@@ -110,7 +110,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 // Query to get the total number of records
-$total_sql = "SELECT COUNT(*) as total FROM jailed j INNER JOIN resident r ON r.ID=j.ResidentID WHERE j.JailedBy=? AND CONCAT_WS( r.ID, r.Firstname, r.Lastname) LIKE ?";
+$total_sql = "SELECT COUNT(*) as total FROM citizen_abroad cab INNER JOIN resident r ON r.ID=cab.ResidentID WHERE cab.AddedBy=? AND CONCAT_WS( r.ID, r.Firstname, r.Lastname) LIKE ?";
 $total_stmt = $conn->prepare($total_sql);
 $total_stmt->bind_param("ss", $_SESSION['ID'],$search_param);
 $total_stmt->execute();
@@ -137,7 +137,7 @@ if ($result->num_rows > 0) {
                 <th colspan='16' style='text-align: left; background-color: #f8f9fa;'>
                     <div style='display: flex; align-items: center;'>
                         <div style='margin-right: 10px;'>
-                            <a class='small' href='addJailed.php'>
+                            <a class='small' href='addCitizenAbroad.php'>
                                 <button class='btn btn-primary'><b>Add New+</b></button>
                             </a>
                         </div>
@@ -148,7 +148,7 @@ if ($result->num_rows > 0) {
                             </form>
                         </div>
                         <div style='flex: 1; text-align: center; font-size: 24px;'>
-                            <h2 class='text-center'>List Of All tenants</h2>
+                            <h2 class='text-center'>List of all citizen abroad</h2>
                         </div>
                         <div style='margin-right: 10px;'>
                             <button class='btn btn-primary' id='generateReportButton'><b>DownloadReport</b></button>
@@ -159,10 +159,12 @@ if ($result->num_rows > 0) {
     // Column headers
     echo "<tr>
                 <th scope='col'>HouseNo</th>
-                <th scope='col'>Prisoner Name</th>
+                <th scope='col'>Name</th>
                 <th scope='col'>Phone</th>
-                <th scope='col'>Prisoner ID</th>
-                <th scope='col'>Reason</th>
+                <th scope='col'>ID</th>
+                <th scope='col'>Country</th>
+                <th scope='col'>City</th>
+                <th scope='col'>State</th>
                 <th scope='col'>Action</th>
               </tr>";
     echo "</thead>";
@@ -177,8 +179,10 @@ if ($result->num_rows > 0) {
                     <td>" . htmlspecialchars($row["Firstname"]) . " " . htmlspecialchars($row["Lastname"]) . " </td>
                     <td>" . htmlspecialchars($row["Telephone"]) . "</td>
                     <td>" . htmlspecialchars($row["ID"]) . "</td>
-                    <td>" . htmlspecialchars($row["reason"]) . "</td>
-                    <td>".($row["status"]=='Inprison'?"<a href='helper/api.php?find=removeJailed&ResidentID=".$row["ResidentID"]."&id=".$row["id"]."' style='color: red;'>Release prisoner</a>":'Released')."</td>
+                    <td>" . htmlspecialchars($row["Country"]) . "</td>
+                    <td>" . htmlspecialchars($row["City"]) . "</td>
+                    <td>" . htmlspecialchars($row["State"]) . "</td>
+                    <td>".($row["status"]=='Abroad'?"<a href='helper/api.php?find=removeAbroad&ResidentID=".$row["ResidentID"]."&id=".$row["id"]."' style='color: red;'>Back home</a>":'In country')."</td>
                   </tr>";
     }
 
@@ -241,7 +245,7 @@ if ($result->num_rows > 0) {
                 <th colspan='16' style='text-align: left; background-color: #f8f9fa;'>
                     <div style='display: flex; align-items: center;'>
                         <div style='margin-right: 10px;'>
-                            <a class='small' href='addHouse.php'>
+                            <a class='small' href='addCitizenAbroad.php'>
                                 <button class='btn btn-primary'><b>Add New+</b></button>
                             </a>
                         </div>

@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'crms/crms',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => NULL,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => 'a1775bc8fbb9fc226745e9a1f247c1da0b46424e',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'crms/crms' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => NULL,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'a1775bc8fbb9fc226745e9a1f247c1da0b46424e',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

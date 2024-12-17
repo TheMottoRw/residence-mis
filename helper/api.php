@@ -1,6 +1,7 @@
 <?php
 include_once "DbApi.php";
 include_once "Administrative.php";
+include_once "MailUtils.php";
 $dbApi = new DbApi();
 $administrative = new Administrative();
 if(!isset($_SESSION)){
@@ -40,6 +41,15 @@ switch($_SERVER['REQUEST_METHOD']){
             case 'removeJailed':
                 echo $dbApi->removeJailed($_GET);
                 break;
+            case 'abroad':
+                echo $dbApi->citizenAbroad($_SESSION);
+                break;
+            case 'removeAbroad':
+                echo $dbApi->removeCitizenAbroad($_GET);
+                break;
+            case 'email':
+                echo sendEmail("","","");
+                break;
             }
             break;
     case 'POST':
@@ -47,6 +57,10 @@ switch($_SERVER['REQUEST_METHOD']){
             case 'addJailed':
                 $_POST['UserId'] = $_SESSION['ID'];
                 echo $dbApi->addJailed($_POST);
+                break;
+            case 'addAbroad':
+                $_POST['UserId'] = $_SESSION['ID'];
+                echo $dbApi->addCitizenAbroad($_POST);
                 break;
         }
         break;
