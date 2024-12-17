@@ -1,4 +1,6 @@
-<?php   
+<?php
+include_once "helper/HelperUtils.php";
+include_once "helper/MailUtils.php";
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -13,9 +15,9 @@ use PHPMailer\PHPMailer\Exception;
 // Database connection
 $host = 'localhost';
 $dbname = 'crms';
-$user = 'root';
+$user = 'super';
 $pass = '';
-
+$error_message = "";
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -32,38 +34,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         // Generate a reset token (using a simple random string)
         $token = bin2hex(random_bytes(16));
+        $code = generateRandomString(6);
+        //check user exists
+        $query = "SELECT * FROM users WHERE email = :email";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(['email' => $email]);
 
-        // Insert token into database (assuming you have a 'password_resets' table)
-        $stmt = $pdo->prepare("INSERT INTO password_resets (email, token, created_at) VALUES (:email, :token, NOW())");
-        $stmt->execute(['email' => $email, 'token' => $token]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if($user){
+            $res = sendRequest(["to"=>$email,"subject"=>"Reset password verification code","body"=>"Hello ".$user['Lastname'].",This is your verification code to reset password: ".$code."<br> Best regards,<br>CRMS"]);
+            $res = json_decode($res);
+            if($res->status){
+                // Insert token into database (assuming you have a 'password_resets' table)
+                $stmt = $pdo->prepare("UPDATE users SET verification_code=:code,need_verification=:need WHERE Email=:email");
+                $stmt->execute(['code' => $code, 'need' => '1', 'email' => $email]);
+                $_SESSION['email'] = $email;
+                $_SESSION['type'] = "user";
+                echo "<script>alert('Check your email for verification code');window.location='verifyCode.php';</script>";
+            }else{
+                echo "<div class='alert alert-danger'>".$res->message."</div>";
+            }
+        }else {
+            $query = "SELECT * FROM resident WHERE Telephone =:email";
+            $stmt = $pdo->prepare($query);
+            $stmt->execute(['email' => $email]);
 
-        // PHPMailer logic to send the reset link email
-        $mail = new PHPMailer(true);
-
-        try {
-            // Server settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';  // Set the SMTP server to Gmail's
-            $mail->SMTPAuth = true;
-            $mail->Username = 'your-email@gmail.com';  // Your Gmail address
-            $mail->Password = 'your-email-password';  // Your Gmail password or app password
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;  // Enable STARTTLS
-            $mail->Port = 587;  // Use port 587 for TLS
-
-            // Recipients
-            $mail->setFrom('your-email@gmail.com', 'Mailer');
-            $mail->addAddress($email);  // Send to the user's email
-
-            // Content
-            $mail->isHTML(true);
-            $mail->Subject = 'Password Reset Request';
-            $mail->Body    = 'Click the link below to reset your password:<br><a href="http://yourdomain.com/resetPassword.php?token=' . $token . '">Reset Password</a>';
-
-            // Send email
-            $mail->send();
-            echo "<script>alert('A password reset link has been sent to your email.');</script>";
-        } catch (Exception $e) {
-            echo "<script>alert('Error sending the email: " . $mail->ErrorInfo . "');</script>";
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($user) {
+                $res = sendRequest(["to" => $email."@yopmail.com", "subject" => "Reset password verification code", "body" => "Hello " . $user['Lastname'] . ",This is your verification code to reset password: <b>" . $code . "</b><br> Best regards,<br>CRMS"]);
+                $res = json_decode($res);
+                if ($res->status) {
+                    // Insert token into database (assuming you have a 'password_resets' table)
+                    $stmt = $pdo->prepare("UPDATE resident SET verification_code=:code,need_verification:need WHERE Telephone=:email");
+                    $stmt->execute(['code' => $code, 'need' => '1', 'email' => $email]);
+                    $_SESSION['email'] = $email;
+                    $_SESSION['type'] = "resident";
+                    echo "<script>alert('Check your email for verification code');window.location='verifyCode.php';</script>";
+                } else {
+                    $error_message =  "<div class='alert alert-danger'>" . $res->message . "</div>";
+                }
+            } else {
+                $error_message =  "<div class='alert alert-danger'>User with that email not found</div>";
+            }
         }
     } else {
         echo "<script>alert('Invalid email address.');</script>";
@@ -118,6 +130,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
     <div class="container">
         <h3>Forgot Password</h3>
         <form method="POST">
+            <?php
+            if($error_message!="") echo $error_message;
+            ?>
             <div class="form-group">
                 <label for="email">Enter your email</label>
                 <input type="email" class="form-control" id="email" name="email" required>

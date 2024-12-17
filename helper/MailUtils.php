@@ -1,33 +1,44 @@
 <?php
-// Include PHPMailer classes (make sure PHPMailer is included in your project)
-require 'vendor/phpmailer/phpmailer/PHPMailerAutoload.php';
+function sendRequest($arr){
+    // API URL of the Flask application
+    $url = 'http://localhost:5000/sendemail';
 
-// Create a new PHPMailer instance
-function sendEmail($to, $subject, $body){
-$mail = new PHPMailer;
+// Data to be sent in the POST request
+    $data = array(
+        'subject' => $arr['subject'],
+        'to' => $arr['to'],
+        'email' => $arr['body'],
+    );
 
-// Set SMTP options
-$mail->isSMTP(); // Set mailer to use SMTP
-$mail->Host = 'smtp.gmail.com'; // Set the SMTP server to Gmail
-$mail->SMTPAuth = true; // Enable SMTP authentication
-$mail->Username = 'itguyrw@gmail.com'; // Your Gmail address
-$mail->Password = 'epyrtxnbfgglddtu'; // Your Gmail password or App Password
-$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Enable TLS encryption
-$mail->Port = 587; // Set the TCP port to connect to (587 for TLS)
+// Encode the data as JSON
+    $json_data = json_encode($data);
 
-// Set the email sender and recipient
-$mail->setFrom('itguyrw@gmail.com', 'Residence MIS'); // Sender's email and name
-$mail->addAddress('damn@yopmail.com', 'Recipient asua'); // Recipient's email and name
+// Initialize cURL
+    $ch = curl_init($url);
 
-// Set email subject and body
-$mail->Subject = 'Test Email from PHP';
-$mail->Body    = 'This is a test email sent from PHP using Gmail SMTP.';
+// Set cURL options
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  // Return response as a string
+    curl_setopt($ch, CURLOPT_POST, true);  // Use POST method
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);  // Attach JSON data
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/json',  // Tell Flask server to expect JSON
+        'Content-Length: ' . strlen($json_data)
+    ));
 
-// Send the email
-if ($mail->send()) {
-    echo 'Email sent successfully!';
-} else {
-    echo 'Mailer Error: ' . $mail->ErrorInfo;
-}
+// Execute the cURL request
+    $response = curl_exec($ch);
+    echo $response->message;
+
+// Check for errors
+//    if ($response === false) {
+//        echo 'Error: ' . curl_error($ch);
+//    } else {
+//        // Success response
+//        echo 'Server Response: ' . $response;
+//    }
+
+// Close cURL session
+    curl_close($ch);
+    return $response;
 }
 ?>
