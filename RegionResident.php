@@ -1,56 +1,22 @@
-<?php include 'connect.php'; ?>
+<?php
+include 'connect.php';
+include_once "includes/session_manager.php";
+include_once "helper/MailUtils.php";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>People in jail</title>
+    <title>Certificate requests</title>
     <link rel="stylesheet" href="bootstrap/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="jsPDF/jspdf.plugin.autotable.min.js">
-    <link rel="stylesheet" href="jsPDF/jspdf.umd.min.js">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.26/jspdf.plugin.autotable.min.js"></script> <!-- Add autoTable plugin -->
-    <style>
-        /* Compact table style */
-        table {
-            table-layout: auto;
-            width: 100%;
-            font-size: 12px; /* Reduce the font size */
-        }
-        th, td {
-            padding: 5px 8px; /* Decrease padding */
-            word-wrap: break-word;
-            text-align: left;
-        }
-        th {
-            background-color: #f1f1f1;
-            font-weight: bold;
-        }
-        td {
-            background-color: #ffffff;
-        }
-        .pagination a, .pagination span {
-            font-size: 12px; /* Reduce pagination font size */
-            padding: 6px 12px;
-        }
-        .pagination {
-            margin-top: 15px;
-        }
-        .table-container {
-            overflow-x: auto;
-        }
-        .pagination a {
-            text-decoration: none;
-        }
-        .pagination .current {
-            font-weight: bold;
-        }
-    </style>
 
 </head>
 <body>
-<?php include 'header.php'; ?>
+<?php
+include 'header.php';
+?>
 
 
 <?php
@@ -62,8 +28,57 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+function filterQueryBuilder()
+{
+    global $conn;
+    if ($_SESSION['role'] == 'Village_Leader') {
+        $sql = "SELECT r.Identifier,r.Firstname,r.Lastname,r.Telephone,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM resident r INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
+WHERE CONCAT_WS(r.Identifier, r.ID) LIKE ? AND h.Cell='" . $_SESSION['cell'] . "' AND h.Village='" . $_SESSION['village'] . "'
+ ORDER BY r.Identifier DESC LIMIT ? OFFSET ?";
+    } else if ($_SESSION['role'] == 'Cell_Leader') {
+        $sql = "SELECT r.Identifier,r.Firstname,r.Lastname,r.Telephone,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM resident r INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
+WHERE CONCAT_WS(r.Identifier, r.ID) LIKE ? AND h.Cell='" . $_SESSION['cell'] . "'
+ ORDER BY r.Identifier DESC LIMIT ? OFFSET ?";
+    }
+    $st = $conn->prepare($sql);
+    return $st;
+}
+
+function approveCertificateRequest($requestNo)
+{
+    global $conn;
+    $date = date("Y-m-d H:i");
+    if ($_SESSION['role'] == 'Landlord') {
+        $sql = "UPDATE certificate_requests SET HouseOwnerApproval='1',HouseOwnerApprovedAt='".$date."' WHERE RequestNo=?";
+    } else if ($_SESSION['role'] == 'Village_Leader') {
+        $sql = "UPDATE certificate_requests SET VillageLeaderApproval='1',VillageLeaderApprovedAt='".$date."' WHERE RequestNo=?";
+    } else if ($_SESSION['role'] == 'Cell_Leader') {
+        $sql = "UPDATE certificate_requests SET CellLeaderApproval='1',CellLeaderApprovedAt='".$date."' WHERE RequestNo=?";
+    }
+    $st = $conn->prepare($sql);
+    $st->bind_param("s", $requestNo);
+
+    if ($st->execute()) {
+        $stmt = $conn->prepare("SELECT r.Lastname,r.Telephone,r.Email FROM certificate_requests cr INNER JOIN resident r ON r.ID=cr.ID WHERE RequestNo=? AND HouseOwnerApproval='1' AND VillageLeaderApproval='1' AND CellLeaderApproval='1'");
+        $stmt->bind_param("i",$requestNo);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        if($data){
+            sendRequest(array("to"=>$data['Telephone']."@yopmail.com","subject"=>"Certificate request approved","body"=>"Dear ".$data['Lastname'].",<br>We are glad to inform you that your certificate request has been <b><font color='green'>APPROVED</font></b><br>Best Regards,<br>CRMS"));
+            $stmt = $conn->prepare("UPDATE certificate_requests SET status='Approved',RejectionReason='' WHERE RequestNo=?");
+            $stmt->bind_param("i",$requestNo);
+            $stmt->execute();
+        }
+        echo "<div class='alert alert-success'><center>Request approved successful</center>.</div>";
+    } else {
+        echo "<div class='alert alert-danger'>Can't approve request</div>";
+    }
+}
+
+
 // Number of records to display per page
-$records_per_page = 7;
+$records_per_page = 5;
 
 // Get the current page number from query string, default is 1
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -76,21 +91,13 @@ $search_query = isset($_GET['search']) ? $conn->real_escape_string($_GET['search
 
 // Prepare the SQL query to include the search condition and order by HouseNo descending
 // Prepare the SQL query with the placeholders
-if ($_SESSION['role'] == 'Prison')
-{
-    $sql = "SELECT h.HouseNo, p.Province, d.District, s.Sector, c.Cell, v.Village,h.ID,CONCAT(t.Firstname,' ',t.Lastname) as tenant_name,t.Telephone as tenant_phone,t.ID as tenant_id
-        FROM houses h INNER JOIN provinces p ON h.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=h.District INNER JOIN sectors s ON s.SectorID=h.Sector 
-                      INNER JOIN cells c ON c.CellID=h.Cell LEFT JOIN villages v ON v.VillageID=h.Village INNER JOIN resident t ON t.HouseNo=h.HouseNo AND t.ID!='".$_SESSION['ID']."'
-        WHERE CONCAT_WS( h.HouseNo, p.Province, d.District, s.Sector, c.Cell, v.Village,h.ID) LIKE ?  AND h.ID='" . $_SESSION['ID'] . "'
-        ORDER BY h.HouseNo DESC
-        LIMIT ? OFFSET ?";
-
-}
-
-$stmt = $conn->prepare("SELECT j.*,r.* FROM jailed j INNER JOIN resident r ON r.ID=j.ResidentID WHERE j.JailedBy=? AND CONCAT_WS( r.ID, r.Firstname, r.Lastname) LIKE ? ");
+$sql = "SELECT r.Firstname,r.Lastname,r.Telephone,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM resident r WHERE r.Village = ?
+AND CONCAT_WS(r.Identifier,r.ID) LIKE ? 
+ORDER BY cr.RequestNo DESC
+LIMIT ? OFFSET ?";
 
 // Prepare the statement
-//$stmt = $conn->prepare($sql);
+$stmt = filterQueryBuilder();
 
 // Check if the statement preparation was successful
 if ($stmt === false) {
@@ -101,7 +108,7 @@ if ($stmt === false) {
 $search_param = "%$search_query%";  // The search query for LIKE condition
 
 // Bind the parameters: s for string (search_param), i for integer (LIMIT and OFFSET)
-$stmt->bind_param("is", $_SESSION['ID'],$search_param);
+$stmt->bind_param("sii", $search_param, $records_per_page, $offset);
 
 // Execute the statement
 $stmt->execute();
@@ -110,9 +117,9 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 // Query to get the total number of records
-$total_sql = "SELECT COUNT(*) as total FROM jailed j INNER JOIN resident r ON r.ID=j.ResidentID WHERE j.JailedBy=? AND CONCAT_WS( r.ID, r.Firstname, r.Lastname) LIKE ?";
+$total_sql = "SELECT COUNT(*) as total FROM resident WHERE CONCAT_WS(Identifier, ID) LIKE ?";
 $total_stmt = $conn->prepare($total_sql);
-$total_stmt->bind_param("ss", $_SESSION['ID'],$search_param);
+$total_stmt->bind_param("s", $search_param);
 $total_stmt->execute();
 $total_result = $total_stmt->get_result();
 $total_row = $total_result->fetch_assoc();
@@ -123,10 +130,12 @@ $total_pages = ceil($total_records / $records_per_page);
 if ($result->num_rows > 0) {
     // Start the container for scrollable table
     echo "<div style='overflow-x: auto;'>";
+    if(isset($_GET['RequestNo'])){
+        approveCertificateRequest($_GET['RequestNo']);
+    }
     if(isset($_GET['message'])) {
         echo "<div class='alert alert-success'><center>".$_GET['message']."</center>.</div>";
     }
-
     // Start the table
     echo "<table border='1' class='table table-striped' style='min-width: 100%;'>";
 
@@ -137,34 +146,23 @@ if ($result->num_rows > 0) {
                 <th colspan='16' style='text-align: left; background-color: #f8f9fa;'>
                     <div style='display: flex; align-items: center;'>
                         <div style='margin-right: 10px;'>
-                            <a class='small' href='addJailed.php'>
-                                <button class='btn btn-primary'><b>Add New+</b></button>
-                            </a>
-                        </div>
-                        <div style='margin-right: 10px;'>
                             <form class='form-inline my-2 my-lg-0' method='GET' action=''>
                                 <input class='form-control mr-sm-2' type='search' name='search' placeholder='Search' aria-label='Search' value='" . htmlspecialchars($search_query) . "'>
                                 <button class='btn btn-outline-success my-2 my-sm-0' type='submit'>Search</button>
                             </form>
                         </div>
                         <div style='flex: 1; text-align: center; font-size: 24px;'>
-                            <h2 class='text-center'>List Of All tenants</h2>
+                            <h2 class='text-center'>Certificate requests</h2>
                         </div>
-                        <div style='margin-right: 10px;'>
-                            <button class='btn btn-primary' id='generateReportButton'><b>DownloadReport</b></button>
-                     </div>
                     </div>
                 </th>
               </tr>";
     // Column headers
     echo "<tr>
-                <th scope='col'>HouseNo</th>
-                <th scope='col'>Prisoner Name</th>
-                <th scope='col'>Phone</th>
-                <th scope='col'>Prisoner ID</th>
-                <th scope='col'>Reason</th>
-                <th scope='col'>Date</th>
-                <th scope='col'>Action</th>
+                <th scope='col'>ResidentNo</th>
+                <th scope='col'>Resident</th>
+                <th scope='col'>Landlord</th>
+                <th scope='col'>Category</th>
               </tr>";
     echo "</thead>";
 
@@ -174,13 +172,10 @@ if ($result->num_rows > 0) {
     // Output data for each row
     while ($row = $result->fetch_assoc()) {
         echo "<tr>
-                    <td>" . htmlspecialchars($row["HouseNo"]) . "</td>
-                    <td>" . htmlspecialchars($row["Firstname"]) . " " . htmlspecialchars($row["Lastname"]) . " </td>
-                    <td>" . htmlspecialchars($row["Telephone"]) . "</td>
-                    <td>" . htmlspecialchars($row["ID"]) . "</td>
-                    <td>" . htmlspecialchars($row["reason"]) . "</td>
-                    <td>" . substr($row["JailedAt"],0,16) . "</td>
-                    <td>".($row["status"]=='Inprison'?"<a href='helper/api.php?find=removeJailed&ResidentID=".$row["ResidentID"]."&id=".$row["id"]."' style='color: red;'>Release prisoner</a>":'Released')."</td>
+                    <td>" . htmlspecialchars($row["Identifier"]) . "</td>
+                    <td>" . htmlspecialchars($row["ID"]) . "<br>" . $row['Firstname'] . " " . $row['Lastname'] . "<br>" . $row['Telephone'] . "</td>
+                    <td>" . htmlspecialchars($row["Landlord"]) . "<br>" . $row['LandlordPhone'] . "</td>
+                    <td>" . htmlspecialchars($row["Citizen_Category"]) . "</td>
                   </tr>";
     }
 
@@ -229,10 +224,6 @@ if ($result->num_rows > 0) {
     echo "</div>";
 } else {
     echo "<div style='overflow-x: auto;'>";
-    if(isset($_GET['message'])) {
-        echo "<div class='alert alert-success'><center>".$_GET['message']."</center>.</div>";
-    }
-
     // Start the table
     echo "<table border='1' class='table table-striped' style='min-width: 100%;'>";
 
@@ -243,32 +234,26 @@ if ($result->num_rows > 0) {
                 <th colspan='16' style='text-align: left; background-color: #f8f9fa;'>
                     <div style='display: flex; align-items: center;'>
                         <div style='margin-right: 10px;'>
-                            <a class='small' href='addHouse.php'>
-                                <button class='btn btn-primary'><b>Add New+</b></button>
-                            </a>
-                        </div>
-                        <div style='margin-right: 10px;'>
                             <form class='form-inline my-2 my-lg-0' method='GET' action=''>
                                 <input class='form-control mr-sm-2' type='search' name='search' placeholder='Search' aria-label='Search' value='" . htmlspecialchars($search_query) . "'>
                                 <button class='btn btn-outline-success my-2 my-sm-0' type='submit'>Search</button>
                             </form>
                         </div>
                         <div style='flex: 1; text-align: center; font-size: 24px;'>
-                            <h2 class='text-center'>List Of All Houses</h2>
+                            <h2 class='text-center'>List of certificate requests</h2>
                         </div>
                     </div>
                 </th>
               </tr>";
     // Column headers
     echo "<tr>
-                <th scope='col'>HouseNo</th>
-                <th scope='col'>Province</th>
-                <th scope='col'>District</th>
-                <th scope='col'>Sector</th>
-                <th scope='col'>Cell</th>
-                <th scope='col'>Village</th>
-                <th scope='col'>OwnerID</th>
-                <th scope='col'>Details</th>
+                <th scope='col'>RequestNo</th>
+                <th scope='col'>ResidentNo</th>
+                <th scope='col'>ID</th>
+                <th scope='col'>RequestDate</th>
+                <th scope='col'>Owner approved</th>
+                <th scope='col'>Village approved</th>
+                <th scope='col'>Cell approved</th>
                 <th scope='col'>Action</th>
               </tr>";
     echo "</thead>";
@@ -332,42 +317,13 @@ $conn->close();
 <script src="bootstrap/jquery.slim.js"></script>
 <script src="bootstrap/bootstrap.bundle.js"></script>
 <script>
-    document.getElementById('generateReportButton').addEventListener('click', function() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape');  // Landscape mode
-
-        // Set title
-        doc.setFontSize(18);
-        doc.text('Registered House Report', 210, 10, null, null, 'center');
-        doc.setFontSize(10);
-        doc.text('Generated on: ' + new Date().toLocaleString(), 210, 20, null, null, 'center');
-
-        // Define table headers
-        const headers = ['HouseNo', 'Province', 'District', 'Sector', 'Cell', 'Village', 'OwnerID'];
-
-        // Collect table data
-        let tableData = [];
-        document.querySelectorAll('table tbody tr').forEach(row => {
-            let rowData = [];
-            row.querySelectorAll('td').forEach(cell => {
-                rowData.push(cell.textContent.trim());
-            });
-            tableData.push(rowData);
-        });
-
-        // Use autoTable to add data to PDF
-        doc.autoTable({
-            head: [headers], // Set the table headers
-            body: tableData, // Add the table data
-            startY: 30,  // Start position of the table
-            theme: 'striped',  // Optional styling
-            margin: { top: 10, left: 10, right: 10, bottom: 10 }
-        });
-
-        // Save the PDF
-        doc.save('House_Registered_Report.pdf');
-    });
+    function rejectRequest(obj){
+        console.log(obj.getAttribute("req-no"));
+        let reason = prompt("Enter reason for rejection");
+        if(reason.length>5){
+            window.location="helper/api.php?find=rejectRequest&RequestNo="+obj.getAttribute("req-no")+"&reason="+reason;
+        }
+    }
 </script>
-
 </body>
 </html>

@@ -28,10 +28,8 @@ try {
 // Handle the form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
     $email = $_POST['email'];
-    $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
     // Validate email
-    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         // Generate a reset token (using a simple random string)
         $token = bin2hex(random_bytes(16));
         $code = generateRandomString(6);
@@ -65,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
                 $res = json_decode($res);
                 if ($res->status) {
                     // Insert token into database (assuming you have a 'password_resets' table)
-                    $stmt = $pdo->prepare("UPDATE resident SET verification_code=:code,need_verification:need WHERE Telephone=:email");
+                    $stmt = $pdo->prepare("UPDATE resident SET verification_code=:code,need_verification=:need WHERE Telephone=:email");
                     $stmt->execute(['code' => $code, 'need' => '1', 'email' => $email]);
                     $_SESSION['email'] = $email;
                     $_SESSION['type'] = "resident";
@@ -77,9 +75,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
                 $error_message =  "<div class='alert alert-danger'>User with that email not found</div>";
             }
         }
-    } else {
-        echo "<script>alert('Invalid email address.');</script>";
-    }
 }
 ?>
 
@@ -135,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
             ?>
             <div class="form-group">
                 <label for="email">Enter your email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <input type="text" class="form-control" id="email" name="email" required>
             </div>
             <button type="submit" class="btn btn-primary">Reset Password</button>
         </form>

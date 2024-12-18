@@ -28,7 +28,7 @@ if (!isset($_GET['identifier'])) {
 $identifier = $_GET['identifier'];
 
 // Fetch the record from the database
-$stmt = $conn->prepare("SELECT t.*,p.Province as ProvinceName,d.District as DistrictName,s.Sector as SectorName,c.Cell as CellName,v.Village as VillageName FROM resident t  INNER JOIN provinces p ON t.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=t.District INNER JOIN sectors s ON s.SectorID=t.Sector INNER JOIN cells c ON c.CellID=t.Cell INNER JOIN villages v ON v.VillageID=t.Village WHERE Identifier = ?");
+$stmt = $conn->prepare("SELECT t.*,p.Province as ProvinceName,d.District as DistrictName,s.Sector as SectorName,c.Cell as CellName,v.Village as VillageName FROM resident t  LEFT JOIN provinces p ON t.Province=p.ProvinceID LEFT JOIN districts d ON d.DistrictID=t.District LEFT JOIN sectors s ON s.SectorID=t.Sector LEFT JOIN cells c ON c.CellID=t.Cell LEFT JOIN villages v ON v.VillageID=t.Village WHERE Identifier = ?");
 $stmt->bind_param("i", $identifier);
 $stmt->execute();
 $result = $stmt->get_result();

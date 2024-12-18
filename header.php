@@ -102,7 +102,7 @@ session_controller();
                     <a class="nav-link" href="tenants.php">Tenants</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="dropdown-item" href="CitizenNoHouses.php">Non Tenants</a>
+                    <a class="nav-link" href="CitizenNoHouses.php">Non Tenants</a>
                 </li>
 
                 <li class="nav-item active">
@@ -160,6 +160,10 @@ session_controller();
 
                 <li class="nav-item active">
                     <a class="nav-link" href="CertificateRequestsView.php">Certificate requests</a>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="RegionResident.php">Resident</a>
                 </li>
 
                 <li class="nav-item active">

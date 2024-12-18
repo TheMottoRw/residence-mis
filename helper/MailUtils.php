@@ -27,7 +27,6 @@ function sendRequest($arr){
 
 // Execute the cURL request
     $response = curl_exec($ch);
-    echo $response->message;
 
 // Check for errors
 //    if ($response === false) {

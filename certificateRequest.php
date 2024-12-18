@@ -220,7 +220,7 @@ if (isset($_POST['identifier'])) {
         <div class="certificate-container">
             <p>
             <h2><b>REPUBLIC OF RWANDA </b></h2></p>
-            <center><p><img src="images/National.jpg" width="150" height="150"></p></center>
+            <center><p><img src="images/National.jpg" width="150" height="150" id="header-logo" style="display: none"></p></center>
             <br>
 
             <div class="certificate-header">
@@ -332,14 +332,14 @@ if (isset($_POST['identifier'])) {
             <form method="POST" action="certificateRequest.php">
                 <?php
 
-                $sql1 = "SELECT cr.*,r.HouseNo FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo WHERE ResidentNo = ?";
+                $sql1 = "SELECT cr.*,r.HouseNo FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo WHERE ResidentNo = ? OR r.ID=? ORDER BY RequestNo DESC";
                 $stmt1 = $conn->prepare($sql1);
-                $stmt1->bind_param("s", $identifier); // Bind for string (ResidentNo)
+                $stmt1->bind_param("ss", $identifier,$identifier); // Bind for string (ResidentNo)
                 $stmt1->execute();
                 $crResult = $stmt1->get_result()->fetch_assoc();
                 if ($crResult) {
                     if ($crResult['HouseOwnerApproval'] == '1' && $crResult['VillageLeaderApproval'] == '1' && $crResult['CellLeaderApproval'] == '1')
-                        echo "<button class='btn btn-primary' onclick='window.print()'>Print certificate</button>";
+                        echo "<button class='btn btn-primary' onclick='printCertificate()'>Print certificate</button>";
                     else if ($crResult['HouseOwnerApproval'] != '1') echo "Status:<b>Waiting Landlord to approve</b>";
                     else if ($crResult['VillageLeaderApproval'] != '1') echo "Status:<b>Waiting Village leader to approve</b>";
                     else echo "Status:<b>Waiting Cell leader to approve</b>";
@@ -365,5 +365,12 @@ if (isset($_POST['identifier'])) {
 
 <script src="bootstrap/jquery.slim.js"></script>
 <script src="bootstrap/bootstrap.bundle.js"></script>
+<script>
+    function printCertificate(){
+        document.querySelector("#header-logo").style.display="block";
+        window.print();
+        document.querySelector("#header-logo").style.display="none";
+    }
+</script>
 </body>
 </html>

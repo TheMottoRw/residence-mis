@@ -73,8 +73,8 @@ $search_query = isset($_GET['search']) ? $conn->real_escape_string($_GET['search
 
 // Prepare the SQL query to include the search condition and order by Identifier descending    t  INNER JOIN provinces p ON t.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=t.District INNER JOIN sectors s ON s.SectorID=t.Sector INNER JOIN cells c ON c.CellID=t.Cell INNER JOIN villages v ON v.VillageID=t.Village
 $sql = "SELECT t.Identifier, t.Firstname, t.Lastname, t.DoB, t.Telephone, t.Gender, t.ID, t.FatherNames, t.MotherNames, p.Province, d.District, s.Sector, c.Cell, v.Village, t.Citizen_Category, t.HouseNo, t.Status, t.RegDate 
-        FROM resident t  INNER JOIN provinces p ON t.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=t.District INNER JOIN sectors s ON s.SectorID=t.Sector INNER JOIN cells c ON c.CellID=t.Cell INNER JOIN villages v ON v.VillageID=t.Village
-        WHERE Status='Pending' AND HouseNo=''  
+        FROM resident t  LEFT JOIN provinces p ON t.Province=p.ProvinceID LEFT JOIN districts d ON d.DistrictID=t.District LEFT JOIN sectors s ON s.SectorID=t.Sector LEFT JOIN cells c ON c.CellID=t.Cell LEFT JOIN villages v ON v.VillageID=t.Village
+        WHERE Status='Pending' AND HouseNo IS NULL  
         AND CONCAT_WS(' ', t.Firstname, t.Lastname, t.DoB, t.Telephone, t.Gender, t.ID, t.FatherNames, t.MotherNames, p.Province, d.District, s.Sector, c.Cell, v.Village, t.Citizen_Category, t.HouseNo,t.Status, t.RegDate) LIKE ? 
         ORDER BY RegDate DESC 
         LIMIT ? OFFSET ?";
@@ -139,14 +139,8 @@ if ($result->num_rows > 0) {
             <th scope='col'>Telephone</th>
             <th scope='col'>Gender</th>
             <th scope='col'>ID</th>
-            <th scope='col'>Father    Names</th>
-            <th scope='col'>Mother    Names</th>
-            <th scope='col'>Province</th>
-            <th scope='col'>District</th>
-            <th scope='col'>Sector</th>
-            <th scope='col'>Cell</th>
-            <th scope='col'>Village</th>
-            <th scope='col'>HouseNo</th>
+            <th scope='col'>Father Names</th>
+            <th scope='col'>Mother Names</th>
             <th scope='col'>Category</th>
             <th scope='col'>Status</th>
             <th scope='col'>Action</th>
@@ -168,12 +162,6 @@ if ($result->num_rows > 0) {
                 <td>" . htmlspecialchars($row["ID"]) . "</td>
                 <td>" . htmlspecialchars($row["FatherNames"]) . "</td>
                 <td>" . htmlspecialchars($row["MotherNames"]) . "</td>
-                <td>" . htmlspecialchars($row["Province"]) . "</td>
-                <td>" . htmlspecialchars($row["District"]) . "</td>
-                <td>" . htmlspecialchars($row["Sector"]) . "</td>
-                <td>" . htmlspecialchars($row["Cell"]) . "</td>
-                <td>" . htmlspecialchars($row["Village"]) . "</td>
-                <td>" . htmlspecialchars($row["HouseNo"]) . "</td>
                 <td>" . htmlspecialchars($row["Citizen_Category"]) . "</td>
                 <td style='color: red;'>" . htmlspecialchars($row["Status"]) . "</td>
                 <td><a href='updateResident.php?identifier=" . htmlspecialchars($row["Identifier"]) . "' style='color: red;'><img src='images/edit.jpg' width='50px' height='50px'></a></td>

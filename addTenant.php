@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             $houseInfo = json_decode($houseInfo, true);
 //            clear recent assignment
-            $stmt0 = $conn->prepare("UPDATE resident SET HouseNo='',Status='Pending' WHERE HouseNo=?");
+            $stmt0 = $conn->prepare("UPDATE resident SET HouseNo=null,Status='Pending' WHERE HouseNo=?");
             $stmt0->bind_param("s", $houseno);
             $stmt0->execute();
             //update user with house no
@@ -228,8 +228,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="text" class="form-control" id="houseno" name="houseno" required>
         </div>
         <div class="form-group">
-            <label for="firstname">ResidentNo:</label>
-            <input type="text" class="form-control" id="identifier" name="identifier"
+<!--            <label for="firstname">ResidentNo:</label>-->
+            <input type="hidden" class="form-control" id="identifier" name="identifier"
                    value="<?php echo generateIdentifier($conn); ?>" readonly required>
         </div>
         <div class="form-group">

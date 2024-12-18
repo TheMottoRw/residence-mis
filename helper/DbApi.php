@@ -39,7 +39,7 @@ class DbApi{
 }
     function removeTenant($houseNo){
             // Fetch authorizer's details from the user table
-        $stmt0 = $this->conn->prepare("UPDATE resident SET HouseNo='',Status='Pending' WHERE HouseNo=?");
+        $stmt0 = $this->conn->prepare("UPDATE resident SET HouseNo=null,Status='Pending' WHERE HouseNo=?");
         $stmt0->bind_param("s", $houseNo);
         $stmt0->execute();
         header("location: ../tenants.php?message=Successfull removed tenant");
