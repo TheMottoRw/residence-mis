@@ -1,4 +1,5 @@
 <?php
+include_once "Helpers.php";
 class DbApi{
     public $conn;
     function __construct(){
@@ -97,6 +98,20 @@ class DbApi{
         $stmt->bind_param("i",$arr['id']);
         $stmt->execute();
         header("location: ../citizenAbroad.php?message=Successfull citizen back home");
+    }
+    function rejectCertificateRequest($arr){
+            // Fetch authorizer's details from the user table
+        $stmt0 = $this->conn->prepare("UPDATE certificate_requests SET status='Rejected',RejectionReason=? WHERE RequestNo=?");
+        $stmt0->bind_param("si",$arr['reason'],$arr['RequestNo']);
+        $stmt0->execute();
+        //send email notification
+        $stmt = $this->conn->prepare("SELECT r.Lastname,r.Telephone,r.Email FROM certificate_requests cr INNER JOIN resident r ON r.ID=cr.ID WHERE RequestNo=?");
+        $stmt->bind_param("i",$arr['RequestNo']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        sendRequest(array("to"=>$data['Telephone']."@yopmail.com","subject"=>"Certificate request rejected","body"=>"Dear ".$data['Lastname'].",<br>We are sadened to let you know that your certificate request has been <b><font color='red'>REJECTED</font></b> for the reason of <b>".$arr['reason']."</b><br>Best Regards,<br>CRMS"));
+        header("location: ../CertificateRequestsView.php?message=Successfull rejected request");
     }
 }
 ?>

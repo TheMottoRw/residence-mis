@@ -24,15 +24,17 @@ def send_email(subject, recipient, body):
         msg['To'] = recipient
         msg['Subject'] = subject
 
+        print(msg)
         # Attach the body text to the message
         msg.attach(MIMEText(body, 'html'))
 
         # Send the email
-        server.sendmail(SENDER_EMAIL, recipient, msg.as_string())
+        server.sendmail(SENDER_EMAIL, recipient.split(","), msg.as_string())
         server.quit()
 
         return jsonify({'status':True,'message': 'Email sent successfully!'}), 200
     except Exception as e:
+        print(str(e))
         return jsonify({'status':False,'message': f'Error: {str(e)}'}), 500
 
 @app.route('/sendemail', methods=['POST'])

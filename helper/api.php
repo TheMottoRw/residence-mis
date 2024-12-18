@@ -47,6 +47,9 @@ switch($_SERVER['REQUEST_METHOD']){
             case 'removeAbroad':
                 echo $dbApi->removeCitizenAbroad($_GET);
                 break;
+            case 'rejectRequest':
+                echo $dbApi->rejectCertificateRequest($_GET);
+                break;
             case 'email':
                 echo sendEmail("","","");
                 break;

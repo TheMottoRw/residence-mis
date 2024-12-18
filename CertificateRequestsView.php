@@ -1,6 +1,7 @@
 <?php
 include 'connect.php';
 include_once "includes/session_manager.php";
+include_once "helper/MailUtils.php";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,16 +32,16 @@ function filterQueryBuilder()
 {
     global $conn;
     if ($_SESSION['role'] == 'Landlord') {
-        $sql = "SELECT cr.*,r.Firstname,r.Lastname,concat(howner.Firstname,' ',howner.Lastname) as Landlord,h.HouseNo,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
+        $sql = "SELECT cr.*,r.Firstname,r.Lastname,r.Telephone,concat(howner.Firstname,' ',howner.Lastname) as Landlord,h.HouseNo,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
 WHERE CONCAT_WS(cr.RequestNo, cr.ResidentNo, cr.ID) LIKE ? AND h.ID='" . $_SESSION['ID'] . "'
  ORDER BY cr.RequestNo DESC LIMIT ? OFFSET ?";
 
     } else if ($_SESSION['role'] == 'Village_Leader') {
-        $sql = "SELECT cr.*,r.Firstname,r.Lastname,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
+        $sql = "SELECT cr.*,r.Firstname,r.Lastname,r.Telephone,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
 WHERE CONCAT_WS(cr.RequestNo, cr.ResidentNo, cr.ID) LIKE ? AND h.Cell='" . $_SESSION['cell'] . "' AND h.Village='" . $_SESSION['village'] . "'
  ORDER BY cr.RequestNo DESC LIMIT ? OFFSET ?";
     } else if ($_SESSION['role'] == 'Cell_Leader') {
-        $sql = "SELECT cr.*,r.Firstname,r.Lastname,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
+        $sql = "SELECT cr.*,r.Firstname,r.Lastname,r.Telephone,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
 WHERE CONCAT_WS(cr.RequestNo, cr.ResidentNo, cr.ID) LIKE ? AND h.Cell='" . $_SESSION['cell'] . "'
  ORDER BY cr.RequestNo DESC LIMIT ? OFFSET ?";
     }
@@ -63,6 +64,17 @@ function approveCertificateRequest($requestNo)
     $st->bind_param("s", $requestNo);
 
     if ($st->execute()) {
+        $stmt = $conn->prepare("SELECT r.Lastname,r.Telephone,r.Email FROM certificate_requests cr INNER JOIN resident r ON r.ID=cr.ID WHERE RequestNo=? AND HouseOwnerApproval='1' AND VillageLeaderApproval='1' AND CellLeaderApproval='1'");
+        $stmt->bind_param("i",$requestNo);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        if($data){
+            sendRequest(array("to"=>$data['Telephone']."@yopmail.com","subject"=>"Certificate request approved","body"=>"Dear ".$data['Lastname'].",<br>We are glad to inform you that your certificate request has been <b><font color='green'>APPROVED</font></b><br>Best Regards,<br>CRMS"));
+            $stmt = $conn->prepare("UPDATE certificate_requests SET status='Approved',RejectionReason='' WHERE RequestNo=?");
+            $stmt->bind_param("i",$requestNo);
+            $stmt->execute();
+        }
         echo "<div class='alert alert-success'><center>Request approved successful</center>.</div>";
     } else {
         echo "<div class='alert alert-danger'>Can't approve request</div>";
@@ -84,7 +96,7 @@ $search_query = isset($_GET['search']) ? $conn->real_escape_string($_GET['search
 
 // Prepare the SQL query to include the search condition and order by HouseNo descending
 // Prepare the SQL query with the placeholders
-$sql = "SELECT cr.*,r.Firstname,r.Lastname,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
+$sql = "SELECT cr.*,r.Firstname,r.Lastname,r.Telephone,CONCAT(howner.Firstname,' ',howner.Lastname) as Landlord,howner.ID as LandlordId,howner.Telephone as LandlordPhone FROM certificate_requests cr INNER JOIN resident r ON r.Identifier=cr.ResidentNo INNER JOIN houses h ON h.HouseNo=r.HouseNo INNER JOIN resident howner ON howner.ID=h.ID
 WHERE CONCAT_WS(cr.RequestNo, cr.ResidentNo, cr.ID) LIKE ? 
 ORDER BY cr.RequestNo DESC
 LIMIT ? OFFSET ?";
@@ -126,6 +138,9 @@ if ($result->num_rows > 0) {
     if(isset($_GET['RequestNo'])){
         approveCertificateRequest($_GET['RequestNo']);
     }
+    if(isset($_GET['message'])) {
+        echo "<div class='alert alert-success'><center>".$_GET['message']."</center>.</div>";
+    }
     // Start the table
     echo "<table border='1' class='table table-striped' style='min-width: 100%;'>";
 
@@ -157,6 +172,7 @@ if ($result->num_rows > 0) {
                 <th scope='col'>Owner approved</th>
                 <th scope='col'>Village approved</th>
                 <th scope='col'>Cell approved</th>
+                <th scope='col'>Status</th>
                 <th scope='col'>Action</th>
               </tr>";
     echo "</thead>";
@@ -169,13 +185,14 @@ if ($result->num_rows > 0) {
         echo "<tr>
                     <th>" . htmlspecialchars($row["RequestNo"]) . "</th>
                     <td>" . htmlspecialchars($row["ResidentNo"]) . "</td>
-                    <td>" . htmlspecialchars($row["ID"]) . "<br>" . $row['Firstname'] . " " . $row['Lastname'] . "</td>
+                    <td>" . htmlspecialchars($row["ID"]) . "<br>" . $row['Firstname'] . " " . $row['Lastname'] . "<br>" . $row['Telephone'] . "</td>
                     <td>" . htmlspecialchars($row["RequestDate"]) . "</td>
                     <td>" . htmlspecialchars($row["Landlord"]) . "<br>" . $row['LandlordPhone'] . "</td>
                     <td>" . htmlspecialchars($row["HouseOwnerApproval"] == 1 ? 'Yes' : 'No') . "</td>
                     <td>" . htmlspecialchars($row["VillageLeaderApproval"] == 1 ? 'Yes' : 'No') . "</td>
                     <td>" . htmlspecialchars($row["CellLeaderApproval"] == 1 ? 'Yes' : 'No') . "</td>
-                    <td><a href='CertificateRequestsView.php?RequestNo=".$row['RequestNo']."'>Approve</a></td>
+                    <td>" . htmlspecialchars($row["status"])."<br>". ($row["status"] == "Rejected" ? "<font color='red'>".$row['RejectionReason']."</font>" : '') . "</td>
+                    <td><a href='CertificateRequestsView.php?RequestNo=".$row['RequestNo']."'>Approve</a>&nbsp;&nbsp;&nbsp;<span href='#' onclick='rejectRequest(this)' req-no='".$row['RequestNo']."' style='color: red'>Reject</span></td>
                   </tr>";
     }
 
@@ -316,5 +333,14 @@ $conn->close();
 ?>
 <script src="bootstrap/jquery.slim.js"></script>
 <script src="bootstrap/bootstrap.bundle.js"></script>
+<script>
+    function rejectRequest(obj){
+        console.log(obj.getAttribute("req-no"));
+        let reason = prompt("Enter reason for rejection");
+        if(reason.length>5){
+            window.location="helper/api.php?find=rejectRequest&RequestNo="+obj.getAttribute("req-no")+"&reason="+reason;
+        }
+    }
+</script>
 </body>
 </html>

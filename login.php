@@ -78,6 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<script type='text/javascript'> document.location = 'jailed.php'; </script>";
         } else if ($_SESSION['role'] == 'Migration') {
             echo "<script type='text/javascript'> document.location = 'citizenAbroad.php'; </script>";
+        }else{
+            echo "<script type='text/javascript'> document.location = 'CertificateRequestsView.php'; </script>";
         }
     }
 

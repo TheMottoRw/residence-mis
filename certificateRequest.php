@@ -2,6 +2,7 @@
 session_start(); // Ensure that the session is started
 
 include 'connect.php'; // Include database connection
+include 'helper/MailUtils.php';
 $resident = null;
 $authorizer_firstname = "";
 $authorizer_lastname = "";
@@ -43,7 +44,7 @@ if (isset($_POST['identifier'])) {
     // Check if the identifier is numeric (for ID search) or alphanumeric (for ResidentNo)
     if (is_numeric($identifier)) {
         // If identifier is numeric, it could be either ID or ResidentNo
-        $sql = "SELECT * FROM resident WHERE (ID = ? OR Identifier = ?) AND DoB = ?";
+        $sql = "SELECT t.*,p.Province as ProvinceName,d.District as DistrictName,s.Sector as SectorName,c.Cell as CellName,v.Village as VillageName FROM resident t  INNER JOIN provinces p ON t.Province=p.ProvinceID INNER JOIN districts d ON d.DistrictID=t.District INNER JOIN sectors s ON s.SectorID=t.Sector INNER JOIN cells c ON c.CellID=t.Cell INNER JOIN villages v ON v.VillageID=t.Village WHERE (ID = ? OR Identifier = ?) AND DoB = ?";
         $stmt = $conn->prepare($sql);
 
         // Check if prepare() failed
@@ -219,7 +220,8 @@ if (isset($_POST['identifier'])) {
         <div class="certificate-container">
             <p>
             <h2><b>REPUBLIC OF RWANDA </b></h2></p>
-            <p><img src="images/National.jpg" width="150" height="150"></p><br>
+            <center><p><img src="images/National.jpg" width="150" height="150"></p></center>
+            <br>
 
             <div class="certificate-header">
                 <p>
@@ -227,6 +229,55 @@ if (isset($_POST['identifier'])) {
                 </p>
             </div>
             <?php
+            function getLandlordVillageCellEmails($rID)
+            {
+                global $conn;
+
+                // SQL queries
+                $landlordSql = "SELECT r.Telephone FROM resident r 
+                    INNER JOIN houses h ON h.HouseNo=r.HouseNo 
+                    INNER JOIN resident lrd ON lrd.ID=h.ID 
+                    WHERE r.ID = ?";
+                $villageSql = "SELECT vl.Email FROM resident r 
+                   INNER JOIN users vl ON vl.Village=r.Village 
+                   WHERE vl.Role='Village_Leader' AND r.ID=?";
+                $cellSql = "SELECT cl.Email FROM resident r 
+                INNER JOIN users cl ON cl.Cell=r.Cell 
+                WHERE cl.Role='Cell_Leader' AND r.ID=?";
+
+                // Prepare statements for each query
+                $landlordStmt = $conn->prepare($landlordSql);
+                $villageStmt = $conn->prepare($villageSql);
+                $cellStmt = $conn->prepare($cellSql);
+
+                // Bind parameters for each query
+                $landlordStmt->bind_param("i", $rID);
+                $villageStmt->bind_param("i", $rID);
+                $cellStmt->bind_param("i", $rID);
+
+                // Execute the landlord query
+                $landlordStmt->execute();
+                $landlordResult = $landlordStmt->get_result()->fetch_assoc();
+                $landlordStmt->free_result();  // Free the result set to avoid "Commands out of sync" error
+
+                // Execute the village query
+                $villageStmt->execute();
+                $villageResult = $villageStmt->get_result()->fetch_assoc();
+                $villageStmt->free_result();  // Free the result set to avoid "Commands out of sync" error
+
+                // Execute the cell query
+                $cellStmt->execute();
+                $cellResult = $cellStmt->get_result()->fetch_assoc();
+                $cellStmt->free_result();  // Free the result set to avoid "Commands out of sync" error
+
+                // Retrieve data from the results
+                $telephone = $landlordResult['Telephone'] ?? "";
+                $villageEmail = $villageResult['Email'] ?? "";
+                $cellEmail = $cellResult['Email'] ?? "";
+
+                // Return the combined email string
+                return $telephone . "@yopmail.com," . $villageEmail . ",cell@yopmail.com";
+            }
             if (isset($_POST['CertificateRequestSubmit'])) {
                 $residentId = $_POST['ResidentId'];
                 $residentNo = $_POST['ResidentNo'];
@@ -239,7 +290,11 @@ if (isset($_POST['identifier'])) {
                 }
 
                 $stmt->bind_param("ss", $residentId, $residentNo);
-                if ($stmt->execute()) {
+                $bo = $stmt->execute();
+                if ($bo) {
+                    //send request to landlord,village and cell leader
+                    $emails = getLandlordVillageCellEmails($residentId);
+                    sendRequest(array("to"=>$emails,"subject"=>"CERTIFICATE REQUEST","body"=>"Dear,<br>We would like to let you know that there is new residence certificate requests.<br>Best Regards,<br>CRMS"));
                     echo "<div class='alert alert-success'><center>Request sent successful</center>.</div>";
                 } else {
                     echo "<div class='alert alert-danger'>Error: " . $stmt->error . "</div>";
@@ -262,8 +317,9 @@ if (isset($_POST['identifier'])) {
                     <p><strong>Father's Name:</strong> <?php echo htmlspecialchars($resident['FatherNames']); ?></p>
                     <p><strong>Mother's Name:</strong> <?php echo htmlspecialchars($resident['MotherNames']); ?></p>
                     <p><strong>Resides at</strong><br>
-                        <?php echo htmlspecialchars($resident['Province'] . ', ' . $resident['District'] . ', ' . $resident['Sector'] . ', ' . $resident['Cell']); ?>
+                        <?php echo htmlspecialchars($resident['ProvinceName'] . ', ' . $resident['DistrictName'] . ', ' . $resident['SectorName'] . ', ' . $resident['CellName']); ?>
                     </p>
+                    <p><strong>Status:</strong> <?php echo htmlspecialchars($resident['Status']); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -281,24 +337,24 @@ if (isset($_POST['identifier'])) {
                 $stmt1->bind_param("s", $identifier); // Bind for string (ResidentNo)
                 $stmt1->execute();
                 $crResult = $stmt1->get_result()->fetch_assoc();
-                if($crResult){
-                    if($crResult['HouseOwnerApproval']=='1' && $crResult['VillageLeaderApproval']=='1' && $crResult['CellLeaderApproval']=='1')
+                if ($crResult) {
+                    if ($crResult['HouseOwnerApproval'] == '1' && $crResult['VillageLeaderApproval'] == '1' && $crResult['CellLeaderApproval'] == '1')
                         echo "<button class='btn btn-primary' onclick='window.print()'>Print certificate</button>";
-                    else if($crResult['HouseOwnerApproval']!='1') echo "Status:<b>Waiting Landlord to approve</b>";
-                    else if($crResult['VillageLeaderApproval']!='1') echo "Status:<b>Waiting Village leader to approve</b>";
+                    else if ($crResult['HouseOwnerApproval'] != '1') echo "Status:<b>Waiting Landlord to approve</b>";
+                    else if ($crResult['VillageLeaderApproval'] != '1') echo "Status:<b>Waiting Village leader to approve</b>";
                     else echo "Status:<b>Waiting Cell leader to approve</b>";
-                }else{
+                } else {
 
-                if ($result->num_rows > 0 && !isset($_POST['CertificateRequestSubmit'])) {
-                    ?>
-                    <input type="hidden" name="CertificateRequestSubmit">
-                    <input type="hidden" name="identifier" value="<?= $identifier; ?>">
-                    <input type="hidden" name="dob" value="<?= $dob; ?>">
-                    <input type="hidden" name="ResidentId" value="<?= $resident['ID']; ?>">
-                    <input type="hidden" name="ResidentNo" value="<?= $resident['Identifier']; ?>">
-                    <input type="submit" class="btn" value="Approval Request">
-                    <?php
-                }
+                    if ($result->num_rows > 0 && !isset($_POST['CertificateRequestSubmit'])) {
+                        ?>
+                        <input type="hidden" name="CertificateRequestSubmit">
+                        <input type="hidden" name="identifier" value="<?= $identifier; ?>">
+                        <input type="hidden" name="dob" value="<?= $dob; ?>">
+                        <input type="hidden" name="ResidentId" value="<?= $resident['ID']; ?>">
+                        <input type="hidden" name="ResidentNo" value="<?= $resident['Identifier']; ?>">
+                        <input type="submit" class="btn" value="Approval Request">
+                        <?php
+                    }
                 }
                 ?>
             </form>

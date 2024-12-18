@@ -148,6 +148,25 @@ session_controller();
                 </li>
             </ul>
             <?php
+        }else if (in_array($_SESSION['role'],array('Village_Leader','Cell_Leader'))) { ?>
+
+            <ul class="navbar-nav mr-auto">
+                <!-- <li class="nav-item active">
+                    <a class="nav-link" href="Homepage.php">Home <span class="sr-only">(current)</span></a>
+                </li>-->
+                <li>
+                    <img src="images/logo.jpg" width="50" height="50" alt="CRMS Logo">
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="CertificateRequestsView.php">Certificate requests</a>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="Logout.php">Logout</a>
+                </li>
+            </ul>
+            <?php
         }
         ?>
     </div>
